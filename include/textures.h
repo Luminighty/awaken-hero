@@ -5,6 +5,7 @@
 
 
 typedef struct {
+	RenderTexture2D render_target;
 	Texture2D hero;
 	Texture2D tileset;
 } Textures;

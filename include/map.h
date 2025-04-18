@@ -2,11 +2,14 @@
 #define MAP_H
 
 #include "config.h"
+#include "fence.h"
 #include "tile.h"
 
 
 typedef struct {
 	Tile tiles[ROOM_SIZE];
+	Fence fences[32];
+	int fence_c;
 } Room;
 
 typedef struct {

@@ -1,15 +1,30 @@
 #include "hero.h"
+
 #include "config.h"
 #include "textures.h"
-#include <raylib.h>
-#include <stdio.h>
 #include "collision.h"
+
+#include <raylib.h>
+#include <assert.h>
+#include <stdio.h>
+
+static const Vector2 size = { 10, 10 };
+static const Vector2 origin = { 3, 6 };
+static const float SPEED = 100;
 
 Hero hero_create() {
 	Hero hero = {0};
-	hero.position = (Rectangle){.x = 60, .y = 60, .width = TILE_SIZE, .height = TILE_SIZE};
+	hero.position = (Rectangle){.x = 83, .y = 83, .width = TILE_SIZE, .height = TILE_SIZE};
+	hero.facing = DIR_DOWN;
 	hero.tile_x = hero.position.x / 16;
 	hero.tile_y = hero.position.y / 16;
+	hero.collider = collider_create((Rectangle){
+		.x = hero.position.x,
+		.y = hero.position.y,
+		.width = size.x,
+		.height = size.y,
+	});
+	collider_set_debug(hero.collider, true);
 	return hero;
 }
 
@@ -32,12 +47,11 @@ static inline Rectangle hero_sprite(Hero* hero) {
 	}
 }
 
-static Vector2 origin = { TILE_SIZE / 2.f, TILE_SIZE};
-static const float SPEED = 100;
 
 
 #define TO_TILE(pos) pos / TILE_SIZE
 void hero_update(Hero* hero) {
+	assert(hero);
 	float dt = GetFrameTime();
 	Vector2 delta = {0};
 	if (IsKeyDown(INPUT_LEFT)) {
@@ -56,24 +70,10 @@ void hero_update(Hero* hero) {
 		delta.y = -SPEED * dt;
 		hero->facing = DIR_UP;
 	}
-	float new_x = hero->position.x + delta.x;
-	int new_tile_x = new_x / TILE_SIZE;
-	if (is_tile_solid(new_tile_x, hero->tile_y)) {
-		new_x = hero->position.x;
-		new_tile_x = hero->tile_x;
-	}
-
-	float new_y = hero->position.y + delta.y;
-	int new_tile_y = new_y / TILE_SIZE;
-	if (is_tile_solid(hero->tile_x, new_tile_y)) {
-		new_y = hero->position.y;
-		new_tile_y = hero->tile_y;
-	}
-
-	hero->position.x = new_x;
-	hero->position.y = new_y;
-	hero->tile_x = new_tile_x;
-	hero->tile_y = new_tile_y;
+	collider_move(hero->collider, (Vector2){.x = delta.x});
+	Vector2 new_position = collider_move(hero->collider, (Vector2){.y = delta.y});
+	hero->position.x = new_position.x;
+	hero->position.y = new_position.y;
 }
 
 void hero_render(Hero* hero) {

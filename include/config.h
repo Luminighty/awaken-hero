@@ -15,6 +15,10 @@
 #define SCREEN_WIDTH (TILE_SIZE * ROOM_WIDTH)
 #define SCREEN_HEIGHT (TILE_SIZE * ROOM_HEIGHT)
 
+#define WIN_SCALE 3
+#define WIN_WIDTH (SCREEN_WIDTH * WIN_SCALE)
+#define WIN_HEIGHT (SCREEN_HEIGHT * WIN_SCALE) 
+
 #define TITLE "Awaken Hero"
 
 typedef enum {

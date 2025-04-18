@@ -2,7 +2,7 @@
 #define HERO_H
 
 #include <raylib.h>
-
+#include "collision.h"
 
 typedef enum {
 	DIR_DOWN,
@@ -13,6 +13,7 @@ typedef enum {
 
 typedef struct {
 	Rectangle position;
+	ColliderId collider;
 	int tile_x, tile_y;
 	Direction facing;
 } Hero;

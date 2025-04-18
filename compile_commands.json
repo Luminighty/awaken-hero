@@ -9,28 +9,11 @@
       "-Wall",
       "-Wextra",
       "-o",
-      "build/hero.o",
-      "src/hero.c"
+      "build/map.o",
+      "src/map.c"
     ],
-    "directory": "/home/lumidev/projects/raylib-hello",
-    "file": "/home/lumidev/projects/raylib-hello/src/hero.c",
-    "output": "/home/lumidev/projects/raylib-hello/build/hero.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-c",
-      "-I./include",
-      "-g",
-      "-O0",
-      "-Wall",
-      "-Wextra",
-      "-o",
-      "build/collision.o",
-      "src/collision.c"
-    ],
-    "directory": "/home/lumidev/projects/raylib-hello",
-    "file": "/home/lumidev/projects/raylib-hello/src/collision.c",
-    "output": "/home/lumidev/projects/raylib-hello/build/collision.o"
+    "directory": "/home/lumidev/projects/awaken-hero",
+    "file": "/home/lumidev/projects/awaken-hero/src/map.c",
+    "output": "/home/lumidev/projects/awaken-hero/build/map.o"
   }
 ]

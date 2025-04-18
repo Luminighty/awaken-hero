@@ -1,18 +1,14 @@
 #include "map.h"
 #include "config.h"
+#include "fence.h"
 #include "textures.h"
 #include "tile.h"
 #include <raylib.h>
-#include <stdio.h>
+#include <assert.h>
 
 
 static void draw_empty_room(Room* room);
 
-Map map_create() {
-	Map map;
-	draw_empty_room(&map.room);
-	return map;
-}
 
 static inline void room_set_tile(Room* room, int x, int y, Tile tile) {
 	room->tiles[y * ROOM_WIDTH + x] = tile;
@@ -53,7 +49,6 @@ static void draw_empty_room(Room* room) {
 	room_set_tile(room, ROOM_WIDTH - 1, 0, TILE_WALL_TR);
 	room_set_tile(room, 0, ROOM_HEIGHT - 1, TILE_WALL_BL);
 	room_set_tile(room, ROOM_WIDTH - 1, ROOM_HEIGHT - 1, TILE_WALL_BR);
-	
 }
 
 
@@ -80,10 +75,39 @@ static void room_render(Room* room) {
 			WHITE
 		);
 	}
+
+	for (int i = 0; i < room->fence_c; i++)
+		fence_render(&room->fences[i]);
 }
 
 void map_render(Map* map) {
 	room_render(&map->room);
 }
 
+static void room_add_fence(Room* room, FenceType type, int x, int y) {
+	assert(sizeof(room->fences) / sizeof(room->fences[0]) > room->fence_c);
+	room->fences[room->fence_c++] = fence_create(type, x * TILE_SIZE, y * TILE_SIZE);
+}
 
+
+Map map_create() {
+	Map map = {0};
+	draw_empty_room(&map.room);
+	room_set_tile(&map.room, 2, 2, TILE_STATUE);
+	room_set_tile(&map.room, ROOM_WIDTH - 3, 2, TILE_STATUE);
+	room_set_tile(&map.room, 2, ROOM_HEIGHT - 3, TILE_BLOCK);
+	room_set_tile(&map.room, ROOM_WIDTH - 3, ROOM_HEIGHT - 3, TILE_BLOCK);
+	room_set_tile(&map.room, ROOM_WIDTH / 2, 0, TILE_FLOOR);
+	room_set_tile(&map.room, 5, 4, TILE_FLOOR_ALT);
+	room_set_tile(&map.room, 5, 5, TILE_FLOOR_ALT);
+
+	room_add_fence(&map.room, FENCE_BL, 3, 2);
+	room_add_fence(&map.room, FENCE_L, 3, 3);
+	room_add_fence(&map.room, FENCE_TL, 3, 4);
+	room_add_fence(&map.room, FENCE_BR, 7, 2);
+	room_add_fence(&map.room, FENCE_R, 7, 3);
+	room_add_fence(&map.room, FENCE_TR, 7, 4);
+	room_add_fence(&map.room, FENCE_T, 6, 2);
+	room_add_fence(&map.room, FENCE_B, 5, 2);
+	return map;
+}
