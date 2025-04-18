@@ -1,0 +1,39 @@
+#ifndef TILE_H
+#define TILE_H
+
+#include <raylib.h>
+
+typedef enum {
+	TILE_NONE = 0,
+	TILE_WALL_TL,
+	TILE_WALL_T,
+	TILE_WALL_TR,
+	TILE_WALL_L,
+	TILE_FLOOR,
+	TILE_WALL_R,
+	TILE_WALL_BL,
+	TILE_WALL_B,
+	TILE_WALL_BR,
+	TILE_CEIL,
+
+	TILE_WALL_CORNER_TL,
+	TILE_WALL_CORNER_TR,
+	TILE_WALL_CORNER_BL,
+	TILE_WALL_CORNER_BR,
+
+	TILE_FLOOR_ALT,
+	TILE_FLOOR_STAIR,
+	TILE_BLOCK,
+	TILE_STATUE,
+	TILE_HOLE,
+	TILE_HOLE_B,
+	TILE_HOLE_T,
+	TILE_HOLE_TB,
+} Tile;
+
+
+extern Rectangle TILE_RECT[];
+extern bool TILE_SOLID[];
+
+
+#endif // TILE_H
