@@ -10,12 +10,8 @@
 static void draw_empty_room(Room* room);
 
 
-static inline void room_set_tile(Room* room, int x, int y, Tile tile) {
-	room->tiles[y * ROOM_WIDTH + x] = tile;
-}
-static inline int room_xy_idx(int x, int y) {
-	return y * ROOM_WIDTH + x;
-}
+static inline void room_set_tile(Room* room, int x, int y, Tile tile) { room->tiles[y * ROOM_WIDTH + x] = tile; }
+static inline int room_xy_idx(int x, int y) { return y * ROOM_WIDTH + x; }
 
 
 #define FOR_ROOM_TILES(x, y) \
@@ -84,8 +80,9 @@ void map_render(Map* map) {
 	room_render(&map->room);
 }
 
+
 static void room_add_fence(Room* room, FenceType type, int x, int y) {
-	assert(sizeof(room->fences) / sizeof(room->fences[0]) > room->fence_c);
+	assert(sizeof(room->fences) / sizeof(room->fences[0]) > (size_t)room->fence_c);
 	room->fences[room->fence_c++] = fence_create(type, x * TILE_SIZE, y * TILE_SIZE);
 }
 
@@ -111,3 +108,4 @@ Map map_create() {
 	room_add_fence(&map.room, FENCE_B, 5, 2);
 	return map;
 }
+

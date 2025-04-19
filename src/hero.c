@@ -4,81 +4,185 @@
 #include "textures.h"
 #include "collision.h"
 
+#include <math.h>
 #include <raylib.h>
+#include <raymath.h>
 #include <assert.h>
-#include <stdio.h>
+
 
 static const Vector2 size = { 10, 10 };
 static const Vector2 origin = { 3, 6 };
-static const float SPEED = 100;
+static const float SPEED = 80;
+static const float WALK_DELAY = 0.4f;
+static const float FLIP_DELAY = 0.2f;
+static const float SWING_DELAY = 0.3f;
+
 
 Hero hero_create() {
 	Hero hero = {0};
-	hero.position = (Rectangle){.x = 83, .y = 83, .width = TILE_SIZE, .height = TILE_SIZE};
-	hero.facing = DIR_DOWN;
-	hero.tile_x = hero.position.x / 16;
-	hero.tile_y = hero.position.y / 16;
+	hero.husk.position = (Rectangle){.x = 83, .y = 83, .width = TILE_SIZE, .height = TILE_SIZE};
+	hero.husk.facing = DIR_DOWN;
+	hero.tile_x = hero.husk.position.x / 16;
+	hero.tile_y = hero.husk.position.y / 16;
 	hero.collider = collider_create((Rectangle){
-		.x = hero.position.x,
-		.y = hero.position.y,
+		.x = hero.husk.position.x,
+		.y = hero.husk.position.y,
 		.width = size.x,
 		.height = size.y,
 	});
-	collider_set_debug(hero.collider, true);
+	hero.husk.animation.palette = HERO_PALETTE_PURPLE;
+	// collider_set_debug(hero.collider, true);
 	return hero;
 }
 
+static void hero_update_animation(HeroHusk* hero, float dt);
 
-#define RECT(_x, _y) ((Rectangle){ .x = _x * (TILE_SIZE + 1), .y = _y * (TILE_SIZE - 1), .width = TILE_SIZE, .height = TILE_SIZE })
-#define RECTF(_x, _y) ((Rectangle){ .x = _x * (TILE_SIZE + 1), .y = _y * (TILE_SIZE - 1), .width = -TILE_SIZE, .height = TILE_SIZE })
-
-static inline Rectangle hero_sprite(Hero* hero) {
-	switch (hero->facing) {
-	case DIR_DOWN:
-		return RECT(0, 0);
-	case DIR_UP:
-		return RECT(1, 0);
-	case DIR_LEFT:
-		return RECT(2, 0);
-	case DIR_RIGHT:
-		return RECTF(2, 0);
-	default:
-		return RECT(7, 0);
-	}
+static inline bool hero_can_walk(Hero* hero) {
+	return !hero->husk.swinging;
 }
-
 
 
 #define TO_TILE(pos) pos / TILE_SIZE
 void hero_update(Hero* hero) {
 	assert(hero);
 	float dt = GetFrameTime();
-	Vector2 delta = {0};
-	if (IsKeyDown(INPUT_LEFT)) {
-		delta.x = -SPEED * dt;
-		hero->facing = DIR_LEFT;
+	Vector2 input = {0};
+	if (hero_can_walk(hero)) {
+		if (IsKeyDown(INPUT_LEFT)) {
+			input.x = -1;
+			hero->husk.facing = DIR_LEFT;
+		}
+		if (IsKeyDown(INPUT_RIGHT)) {
+			input.x = 1;
+			hero->husk.facing = DIR_RIGHT;
+		}
+		if (IsKeyDown(INPUT_DOWN)) {
+			input.y = 1;
+			hero->husk.facing = DIR_DOWN;
+		}
+		if (IsKeyDown(INPUT_UP)) {
+			input.y = -1;
+			hero->husk.facing = DIR_UP;
+		}
+		Vector2 velocity = Vector2Scale(Vector2Normalize(input), SPEED * dt);
+		collider_move(hero->collider, (Vector2){.x = velocity.x});
+		Vector2 new_position = collider_move(hero->collider, (Vector2){.y = velocity.y});
+		hero->husk.position.x = new_position.x;
+		hero->husk.position.y = new_position.y;
 	}
-	if (IsKeyDown(INPUT_RIGHT)) {
-		delta.x = SPEED * dt;
-		hero->facing = DIR_RIGHT;
-	}
-	if (IsKeyDown(INPUT_DOWN)) {
-		delta.y = SPEED * dt;
-		hero->facing = DIR_DOWN;
-	}
-	if (IsKeyDown(INPUT_UP)) {
-		delta.y = -SPEED * dt;
-		hero->facing = DIR_UP;
-	}
-	collider_move(hero->collider, (Vector2){.x = delta.x});
-	Vector2 new_position = collider_move(hero->collider, (Vector2){.y = delta.y});
-	hero->position.x = new_position.x;
-	hero->position.y = new_position.y;
+	hero->husk.animation.is_moving = fabs(input.x) + fabs(input.y) > 0.1f;
+	hero_husk_update(&hero->husk);
 }
 
-void hero_render(Hero* hero) {
+
+void hero_husk_update(HeroHusk *hero) {
+	assert(hero);
+	float dt = GetFrameTime();
+	if (hero->swinging) {
+		hero->swing_tick += dt;
+		if (hero->swing_tick > SWING_DELAY)
+			hero->swinging = false;
+	} else if (IsKeyPressed(INPUT_SWING)) {
+		hero->swinging = true;
+		hero->swing_tick = 0.f;
+	}
+	hero_update_animation(hero, dt);
+}
+
+
+static inline void hero_update_animation(HeroHusk* hero, float dt) {
+	if (hero->swinging) {
+		hero->animation.state = HERO_STATE_SWING;
+		return;
+	}
+
+	hero->animation.state = hero->animation.is_moving ? HERO_STATE_WALK : HERO_STATE_IDLE;
+	if (hero->animation.is_moving) {
+		hero->animation.flip_tick += dt;
+		hero->animation.walk_tick += dt;
+		if (hero->animation.flip_tick > FLIP_DELAY) {
+			hero->animation.flipped = !hero->animation.flipped;
+			hero->animation.flip_tick -= FLIP_DELAY;
+		}
+		if (hero->animation.walk_tick > WALK_DELAY) {
+			hero->animation.walk_tick -= WALK_DELAY;
+		}
+	} else {
+		hero->animation.flip_tick = FLIP_DELAY / 2.f;
+		hero->animation.walk_tick = WALK_DELAY / 0.15f;
+	}
+}
+
+
+#define RECT(_x, _y) ((Rectangle){ .x = _x * (TILE_SIZE + 1), .y = _y * (TILE_SIZE + 1), .width = TILE_SIZE, .height = TILE_SIZE })
+#define RECTF(_x, _y) ((Rectangle){ .x = _x * (TILE_SIZE + 1), .y = _y * (TILE_SIZE + 1), .width = -TILE_SIZE, .height = TILE_SIZE })
+#define NONE_SPRITE ((Rectangle){ .x = 7 * (TILE_SIZE + 1), .y = 0 * (TILE_SIZE + 1), .width = -TILE_SIZE, .height = -TILE_SIZE })
+
+static inline Rectangle hero_sprite_idle(HeroHusk* hero) {
+	switch (hero->facing) {
+	case DIR_DOWN:
+		return hero->animation.flipped ? RECTF(0, 0) : RECT(0, 0);
+	case DIR_UP:
+		return hero->animation.flipped ? RECTF(1, 0) : RECT(1, 0);
+	case DIR_LEFT:
+		return RECT(2, 0);
+	case DIR_RIGHT:
+		return RECTF(2, 0);
+	default:
+		return NONE_SPRITE;
+	}
+}
+
+
+static inline Rectangle hero_sprite_walk(HeroHusk* hero) {
+	switch (hero->facing) {
+	case DIR_DOWN:
+		return hero->animation.flipped ? RECTF(0, 0) : RECT(0, 0);
+	case DIR_UP:
+		return hero->animation.flipped ? RECTF(1, 0) : RECT(1, 0);
+	case DIR_LEFT:
+		return hero->animation.walk_tick < WALK_DELAY / 2.f ? RECT(2, 0) : RECT(3, 0);
+	case DIR_RIGHT:
+		return hero->animation.walk_tick < WALK_DELAY / 2.f ? RECTF(2, 0) : RECTF(3, 0);
+	default:
+		return NONE_SPRITE;
+	}
+}
+
+
+static inline Rectangle hero_sprite_swing(HeroHusk* hero) {
+	switch (hero->facing) {
+	case DIR_DOWN:
+		return hero->swing_tick < SWING_DELAY / 2.f ? RECT(0, 1) : RECT(1, 1);
+	case DIR_UP:
+		return hero->swing_tick < SWING_DELAY / 2.f ? RECT(2, 1) : RECT(3, 1);
+	case DIR_LEFT:
+		return hero->swing_tick < SWING_DELAY / 2.f ? RECT(4, 1) : RECT(5, 1);
+	case DIR_RIGHT:
+		return hero->swing_tick < SWING_DELAY / 2.f ? RECTF(4, 1) : RECTF(5, 1);
+	default:
+		return NONE_SPRITE;
+	}
+}
+
+
+static inline Rectangle hero_sprite(HeroHusk* hero) {
+	switch (hero->animation.state) {
+	case HERO_STATE_IDLE:
+		return hero_sprite_idle(hero);
+	case HERO_STATE_WALK:
+		return hero_sprite_walk(hero);
+	case HERO_STATE_SWING:
+		return hero_sprite_swing(hero);
+	default:
+		return NONE_SPRITE;
+	}
+}
+
+
+void hero_render(HeroHusk* hero) {
 	DrawTexturePro(
-		textures.hero, 
+		textures.hero_palettes[hero->animation.palette], 
 		hero_sprite(hero),
 		hero->position,
 		origin,
@@ -86,3 +190,4 @@ void hero_render(Hero* hero) {
 		WHITE
 	);
 }
+

@@ -14,7 +14,7 @@ else
 endif
 
 
-DEPS=$(wildcard $(IDIR)/**/*.h)
+DEPS=$(wildcard $(IDIR)/*.h)
 SRCS := $(shell find src -name '*.c')
 OBJS=$(patsubst src/%.c, build/%.o, $(SRCS))
 
@@ -29,7 +29,7 @@ release: $(TARGET)
 
 
 build/%.o: src/%.c $(DEPS)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 

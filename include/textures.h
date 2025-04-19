@@ -1,12 +1,14 @@
 #ifndef TEXTURES_H
 #define TEXTURES_H
 
+#include "hero.h"
 #include <raylib.h>
 
 
 typedef struct {
 	RenderTexture2D render_target;
 	Texture2D hero;
+	Texture2D hero_palettes[HERO_PALETTE_SIZE];
 	Texture2D tileset;
 } Textures;
 

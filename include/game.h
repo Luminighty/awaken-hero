@@ -5,9 +5,13 @@
 #include "map.h"
 
 
+#define MAX_HERO_HUSKS 4
+
 typedef struct {
 	Map map;
 	Hero hero;
+	HeroHusk hero_husks[MAX_HERO_HUSKS];
+	size_t hero_husk_count;
 } Game;
 
 extern Game game;

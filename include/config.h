@@ -1,8 +1,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-
 #include <raylib.h>
+
+
 #define TILE_SIZE 16
 
 #define ROOM_WIDTH 11
@@ -21,11 +22,13 @@
 
 #define TITLE "Awaken Hero"
 
+
 typedef enum {
 	INPUT_DOWN = KEY_DOWN,
 	INPUT_UP = KEY_UP,
 	INPUT_LEFT = KEY_LEFT,
 	INPUT_RIGHT = KEY_RIGHT,
+	INPUT_SWING = KEY_X,
 } Input;
 
 

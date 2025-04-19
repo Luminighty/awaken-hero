@@ -16,6 +16,7 @@ typedef enum {
 	FENCE_B,
 } FenceType;
 
+
 typedef struct {
 	FenceType type;
 	Rectangle position;
@@ -26,5 +27,6 @@ typedef struct {
 Fence fence_create(FenceType type, int x, int y);
 void fence_destroy(Fence* fence);
 void fence_render(Fence* fence);
+
 
 #endif // FENCE_H
