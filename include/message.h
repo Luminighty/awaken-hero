@@ -2,6 +2,7 @@
 #define MESSAGE_H
 
 #include "hero.h"
+#include "network_hero.h"
 #include <stddef.h>
 
 
@@ -22,11 +23,12 @@ typedef enum {
 
 typedef struct {
 	Action action;
+	size_t owner;
 } MessageAction;
 
 
 typedef struct {
-	HeroHusk husk;
+	NetworkHeroState network_hero;
 } MessageState;
 
 

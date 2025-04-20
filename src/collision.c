@@ -1,6 +1,7 @@
 #include "collision.h"
 #include "config.h"
 #include "game.h"
+#include "map.h"
 #include "tile.h"
 
 #include <raylib.h>
@@ -39,7 +40,7 @@ void collider_set_enabled(ColliderId id, bool enabled) { server.colliders.items[
 void collider_set_debug(ColliderId id, bool debug) { server.colliders.items[id].debug = debug; }
 
 static inline bool is_tile_solid(int x, int y) {
-	Tile tile = game.map.room.tiles[y * ROOM_WIDTH + x];
+	Tile tile = map_get_tile(&game.map, x, y);
 	return TILE_SOLID[tile];
 }
 
@@ -48,10 +49,12 @@ static inline bool is_colliding_with_map(Rectangle area) {
 	int from_y = area.y / TILE_SIZE;
 	int to_x = (area.x + area.width) / TILE_SIZE;
 	int to_y = (area.y + area.height) / TILE_SIZE;
-	for (int y = from_y; y <= to_y; y++)
-	for (int x = from_x; x <= to_x; x++)
+	for (int y = from_y; y <= to_y; y++) {
+	for (int x = from_x; x <= to_x; x++) {
 		if (is_tile_solid(x, y))
 			return true;
+	}
+	}
 	return false;
 }
 
@@ -74,7 +77,7 @@ static inline bool rect_intersects(Rectangle left, Rectangle right) {
 		left.y + left.height > right.y;
 }
 
-static inline bool collides_with(Collider* self, Collider* other, Rectangle area) {
+static inline bool collides_with(Collider* other, Rectangle area) {
 	if (rect_intersects(area, other->area))
 		return true;
 	return false;
@@ -95,7 +98,7 @@ Vector2 collider_move(ColliderId id, Vector2 delta) {
 
 	// TODO: Check with other colliders
 	for (size_t other_id = 0; other_id < server.colliders.count; other_id++)
-		if(id != other_id && collides_with(collider, &server.colliders.items[other_id], new_area))
+		if(id != other_id && collides_with(&server.colliders.items[other_id], new_area))
 			return AS_VEC2(collider->area);
 
 	server.colliders.items[id].area.x = new_area.x;

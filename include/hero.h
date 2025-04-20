@@ -41,7 +41,6 @@ typedef struct {
 
 
 typedef struct {
-	size_t owner;
 	Rectangle position;
 	Direction facing;
 	HeroAnimState animation;
@@ -53,14 +52,17 @@ typedef struct {
 typedef struct {
 	HeroHusk husk;
 	ColliderId collider;
-	int tile_x, tile_y;
+	int room_x, room_y;
 } Hero;
 
+
+extern const float HERO_SPEED;
 
 Hero hero_create();
 void hero_render(HeroHusk* hero);
 void hero_update(Hero* hero);
 void hero_husk_update(HeroHusk* hero);
+
 
 
 #endif // HERO_H

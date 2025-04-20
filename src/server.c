@@ -13,20 +13,6 @@
 static int socketfd;
 
 
-static const char* TAG_STR[] = {
-	[TAG_NONE] = "NONE",
-	[TAG_CONNECT] = "CONNECT",
-	[TAG_DISCONNECT] = "DISCONNECT",
-	[TAG_ASSIGN_UID] = "ASSIGN_UID",
-	[TAG_SYNC_STATE] = "SYNC_STATE",
-	[TAG_ACTION] = "ACTION",
-};
-
-static void message_print(Message* message) {
-	assert(message);
-	printf("%s", TAG_STR[message->tag]);
-}
-
 static Server server_create() {
 	Server server = {0};
 	if ( (server.socketfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {

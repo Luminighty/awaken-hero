@@ -29,11 +29,15 @@ typedef enum {
 	TILE_HOLE_B,
 	TILE_HOLE_T,
 	TILE_HOLE_TB,
+
+	TILE_TORCH,
+	TILE_CAULDRON,
 } Tile;
 
 
 extern Rectangle TILE_RECT[];
 extern bool TILE_SOLID[];
+void tileset_update();
 
 
 #endif // TILE_H

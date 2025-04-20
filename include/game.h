@@ -3,15 +3,18 @@
 
 #include "hero.h"
 #include "map.h"
+#include "network_hero.h"
 
+#include <raylib.h>
 
 #define MAX_HERO_HUSKS 4
 
 typedef struct {
+	Camera2D camera;
 	Map map;
 	Hero hero;
-	HeroHusk hero_husks[MAX_HERO_HUSKS];
-	size_t hero_husk_count;
+	NetworkHero network_heroes[MAX_HERO_HUSKS];
+	size_t network_hero_count;
 } Game;
 
 extern Game game;

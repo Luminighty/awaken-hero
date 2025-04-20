@@ -1,5 +1,7 @@
 #include "game.h"
+#include "map.h"
 #include "server.h"
+
 #include <raylib.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,6 +13,7 @@ int main(int argc, char* argv[]) {
 	if (argc > 1 && strcmp(argv[1], "--server") == 0)
 		return server_main();
 
+	printf("Map size: %lu", sizeof(Map));
 	game_create();
 	while(game_is_running()) {
 		game_update();

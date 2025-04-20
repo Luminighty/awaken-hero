@@ -12,12 +12,16 @@ typedef struct {
 	int fence_c;
 } Room;
 
+
+// TODO: Consider using a sparse tilemap (size_t[y][x] -> Room)
 typedef struct {
-	Room room;
+	Room rooms[MAP_HEIGHT][MAP_WIDTH];
 } Map;
 
 Map map_create();
+void map_render(Map* map, int room_x, int room_y);
+Room* map_get_room_from_tile(Map* map, int x, int y);
+Tile map_get_tile(Map* map, int x, int y);
 
-void map_render(Map* map);
 
 #endif // MAP_H

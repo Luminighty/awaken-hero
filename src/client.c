@@ -1,6 +1,8 @@
 #include "client.h"
 #include "game.h"
 #include "message.h"
+#include "log.h"
+#include "network_hero.h"
 
 #include <assert.h>
 #include <fcntl.h>
@@ -14,11 +16,11 @@
 #include <netinet/in.h> 
 #include <unistd.h>
 
-#define LOG(...) printf("[NETWORK] " __VA_ARGS__); fflush(stdout)
+#define LOG_HEADER "NETWORK"
 
 Client client = {0};
 
-static const double SYNC_DELAY = 0.2;
+const double NETWORK_SYNC_DELAY = 0.1;
 static const int MAX_MESSSAGES = 20;
 
 static inline void message_send(Message message) {
@@ -45,42 +47,59 @@ static inline int message_receive(Message* message) {
 	return n;
 }
 
+static inline bool find_network_hero(size_t owner, NetworkHero** hero) {
+	for (size_t i = 0; i < game.network_hero_count; i++) {
+		if (game.network_heroes[i].owner != owner)
+			continue;
+		*hero = &game.network_heroes[i];
+		return true;
+	}
+	assert(MAX_HERO_HUSKS > game.network_hero_count);
+	*hero = &game.network_heroes[game.network_hero_count++];
+	(*hero)->owner = owner;
+	return false;
+}
 
 static void handle_sync_state(size_t sender, MessageState* state) {
-	bool found = false;
-	for (size_t i = 0; i < game.hero_husk_count && !found; i++) {
-		if (game.hero_husks[i].owner != sender)
-			continue;
-		game.hero_husks[i] = state->husk;
-		found = true;
-	}
-	if (!found) {
-		assert(MAX_HERO_HUSKS > game.hero_husk_count);
-		game.hero_husks[game.hero_husk_count++] = state->husk;
-	}
+	NetworkHero* network_hero = NULL;
+	bool found = find_network_hero(sender, &network_hero);
+	assert(network_hero != NULL);
+	if (!found)
+		network_hero_set_state(network_hero, &state->network_hero);
+	hero_husk_get_state(&network_hero->husk, &network_hero->previous);
+	network_hero_handle_sync(network_hero, &state->network_hero);
 }
 
 static void handle_action(size_t sender, MessageAction* action) {
-	// TODO: Implement action syncing
+	NetworkHero* network_hero = NULL;
+	find_network_hero(sender, &network_hero);
+	assert(network_hero != NULL);
+	switch (action->action) {
+	case ACTION_SWING:
+		network_hero_handle_action(network_hero);
+			break;
+		default:
+			assert(0);
+	}
 }
 
 static void handle_assign_uid(size_t uid) {
+	LOG("Assigning UID: %zu\n", uid);
 	client.uid = uid;
 	client.status = CLIENT_STATUS_READY;
 	game.hero.husk.animation.palette = (uid - 1) % HERO_PALETTE_SIZE;
-	game.hero.husk.owner = uid;
 }
 
 static void handle_server_message(Message* message) {
 	switch (message->tag) {
-	case TAG_ASSIGN_UID:
-		handle_assign_uid(message->data.uid);
-		break;
-	case TAG_SYNC_STATE:
-		handle_sync_state(message->sender, &message->data.state);
-		break;
-	case TAG_ACTION:
-		handle_action(message->sender, &message->data.action);
+		case TAG_ASSIGN_UID:
+			handle_assign_uid(message->data.uid);
+			break;
+		case TAG_SYNC_STATE:
+			handle_sync_state(message->sender, &message->data.state);
+			break;
+		case TAG_ACTION:
+			handle_action(message->sender, &message->data.action);
 		break;
 	case TAG_CONNECT:
 		LOG("Unexpected message type: TAG_CONNECT\n");
@@ -92,13 +111,6 @@ static void handle_server_message(Message* message) {
 		LOG("Unknown message type: %d\n", message->tag);
 		break;
 	}
-}
-
-
-static inline Message message_state() {
-	Message message = {.tag = TAG_SYNC_STATE};
-	message.data.state.husk = game.hero.husk;
-	return message;
 }
 
 
@@ -116,7 +128,7 @@ void network_client_create() {
 
 	client.status = CLIENT_STATUS_CONNECTED;
 	message_send((Message){.tag = TAG_CONNECT });
-	LOG("Client connected...");
+	LOG("Client connected...\n");
 }
 
 
@@ -130,15 +142,22 @@ void network_client_destroy() {
 
 static inline Message message_create_state_sync() {
 	Message message = {.tag = TAG_SYNC_STATE};
-	message.data.state.husk = game.hero.husk;
+	hero_husk_get_state(&game.hero.husk, &message.data.state.network_hero);
 	return message;
+}
+
+void message_send_action(MessageAction action) {
+	Message message = {.tag = TAG_ACTION};
+	message.data.action = action;
+	message.data.action.owner = client.uid;
+	message_send(message);
 }
 
 void network_client_update() {
 	if (client.status == CLIENT_STATUS_DISCONNECTED)
 		return;
 	int n;
-	Message message;
+	Message message = {0};
 	int message_c = 0;
 	while (MAX_MESSSAGES > message_c++) {
 		n = message_receive(&message);
@@ -150,7 +169,7 @@ void network_client_update() {
 		return;
 
 	double time = GetTime();
-	if (client.last_sync + SYNC_DELAY < time) {
+	if (client.last_sync + NETWORK_SYNC_DELAY < time) {
 		client.last_sync = time;
 		message_send(message_create_state_sync());
 	}

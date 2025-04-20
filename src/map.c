@@ -76,36 +76,91 @@ static void room_render(Room* room) {
 		fence_render(&room->fences[i]);
 }
 
-void map_render(Map* map) {
-	room_render(&map->room);
+void map_render(Map* map, int room_x, int room_y) {
+	room_render(&map->rooms[room_y][room_x]);
 }
 
-
+/*
+  TODO: Remove this once it's not needed (reading maps from files)
+ 
 static void room_add_fence(Room* room, FenceType type, int x, int y) {
 	assert(sizeof(room->fences) / sizeof(room->fences[0]) > (size_t)room->fence_c);
 	room->fences[room->fence_c++] = fence_create(type, x * TILE_SIZE, y * TILE_SIZE);
+}
+*/
+
+enum {
+	DOOR_UP = 1 << 0,
+	DOOR_DOWN = 1 << 1,
+	DOOR_LEFT = 1 << 2,
+	DOOR_RIGHT = 1 << 3,
+	ROOM_STATUES = 1 << 4,
+	ROOM_BLOCKS = 1 << 5,
+	ROOM_TORCHES = 1 << 6,
+	ROOM_CAULDRON = 1 << 7,
+	ROOM_ALT_FLOOR = 1 << 8,
+};
+
+static void room_create(Room* room, int config) {
+	draw_empty_room(room);
+	if (config & DOOR_UP)
+		room_set_tile(room, ROOM_WIDTH / 2, 0, TILE_FLOOR);
+	if (config & DOOR_DOWN)
+		room_set_tile(room, ROOM_WIDTH / 2, ROOM_HEIGHT - 1, TILE_FLOOR);
+	if (config & DOOR_LEFT)
+		room_set_tile(room, 0, ROOM_HEIGHT / 2, TILE_FLOOR);
+	if (config & DOOR_RIGHT)
+		room_set_tile(room, ROOM_WIDTH - 1, ROOM_HEIGHT / 2, TILE_FLOOR);
+	if (config & ROOM_STATUES) {
+		room_set_tile(room, 2, 2, TILE_STATUE);
+		room_set_tile(room, ROOM_WIDTH - 3, 2, TILE_STATUE);
+	}
+	if (config & ROOM_BLOCKS) {
+		room_set_tile(room, 2, ROOM_HEIGHT - 3, TILE_BLOCK);
+		room_set_tile(room, ROOM_WIDTH - 3, ROOM_HEIGHT - 3, TILE_BLOCK);
+	}
+	if (config & ROOM_ALT_FLOOR) {
+		room_set_tile(room, 5, 4, TILE_FLOOR_ALT);
+		room_set_tile(room, 5, 5, TILE_FLOOR_ALT);
+	}
+	if (config & ROOM_CAULDRON) {
+		room_set_tile(room, ROOM_WIDTH / 2, ROOM_HEIGHT / 2, TILE_CAULDRON);
+	}
+	if (config & ROOM_TORCHES) {
+		room_set_tile(room, 2, 0, TILE_TORCH);
+		room_set_tile(room, 3, 0, TILE_TORCH);
+		room_set_tile(room, ROOM_WIDTH - 3, 0, TILE_TORCH);
+		room_set_tile(room, ROOM_WIDTH - 4, 0, TILE_TORCH);
+	}
 }
 
 
 Map map_create() {
 	Map map = {0};
-	draw_empty_room(&map.room);
-	room_set_tile(&map.room, 2, 2, TILE_STATUE);
-	room_set_tile(&map.room, ROOM_WIDTH - 3, 2, TILE_STATUE);
-	room_set_tile(&map.room, 2, ROOM_HEIGHT - 3, TILE_BLOCK);
-	room_set_tile(&map.room, ROOM_WIDTH - 3, ROOM_HEIGHT - 3, TILE_BLOCK);
-	room_set_tile(&map.room, ROOM_WIDTH / 2, 0, TILE_FLOOR);
-	room_set_tile(&map.room, 5, 4, TILE_FLOOR_ALT);
-	room_set_tile(&map.room, 5, 5, TILE_FLOOR_ALT);
+	for (int y = 0; y < MAP_HEIGHT; y++) {
+	for (int x = 0; x < MAP_WIDTH; x++) {
+		int idx = y * MAP_WIDTH + x;
+		int config = idx << 4;
+		config |= x != 0 ? DOOR_LEFT : 0;
+		config |= x != MAP_WIDTH - 1 ? DOOR_RIGHT : 0;
+		config |= y != 0 ? DOOR_UP : 0;
+		config |= y != MAP_HEIGHT - 1 ? DOOR_DOWN : 0;
+		room_create(&map.rooms[y][x], config);
+	}}
 
-	room_add_fence(&map.room, FENCE_BL, 3, 2);
-	room_add_fence(&map.room, FENCE_L, 3, 3);
-	room_add_fence(&map.room, FENCE_TL, 3, 4);
-	room_add_fence(&map.room, FENCE_BR, 7, 2);
-	room_add_fence(&map.room, FENCE_R, 7, 3);
-	room_add_fence(&map.room, FENCE_TR, 7, 4);
-	room_add_fence(&map.room, FENCE_T, 6, 2);
-	room_add_fence(&map.room, FENCE_B, 5, 2);
 	return map;
 }
 
+Room* map_get_room_from_tile(Map* map, int x, int y) {
+	int room_x = x / ROOM_WIDTH;
+	int room_y = y / ROOM_HEIGHT;
+	return &map->rooms[room_y][room_x];
+}
+
+Tile map_get_tile(Map* map, int x, int y) {
+	int room_x = x / ROOM_WIDTH;
+	int tile_x = x % ROOM_WIDTH;
+	int room_y = y / ROOM_HEIGHT;
+	int tile_y = y % ROOM_HEIGHT;
+	return map->rooms[room_y][room_x].tiles[room_xy_idx(tile_x, tile_y)];
+}
