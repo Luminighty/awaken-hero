@@ -1,6 +1,8 @@
 #include "map.h"
 #include "config.h"
 #include "fence.h"
+#include "map_tiled.h"
+#include "pot.h"
 #include "textures.h"
 #include "tile.h"
 #include <raylib.h>
@@ -10,8 +12,12 @@
 static void draw_empty_room(Room* room);
 
 
-static inline void room_set_tile(Room* room, int x, int y, Tile tile) { room->tiles[y * ROOM_WIDTH + x] = tile; }
-static inline int room_xy_idx(int x, int y) { return y * ROOM_WIDTH + x; }
+static inline void room_set_tile(Room* room, int x, int y, Tile tile) { 
+	room->tiles[y * ROOM_WIDTH + x] = tile;
+}
+static inline int room_xy_idx(int x, int y) { 
+	return y * ROOM_WIDTH + x;
+}
 
 
 #define FOR_ROOM_TILES(x, y) \
@@ -74,6 +80,12 @@ static void room_render(Room* room) {
 
 	for (int i = 0; i < room->fence_c; i++)
 		fence_render(&room->fences[i]);
+	for (int i = 0; i < room->pot_c; i++)
+		pot_render(&room->pots[i]);
+	for (int i = 0; i < room->chest_c; i++)
+		chest_render(&room->chests[i]);
+	for (int i = 0; i < room->owl_c; i++)
+		owl_render(&room->owls[i]);
 }
 
 void map_render(Map* map, int room_x, int room_y) {
@@ -136,6 +148,8 @@ static void room_create(Room* room, int config) {
 
 
 Map map_create() {
+	return map_tiled_load("assets/maps/debug.json");
+	/*
 	Map map = {0};
 	for (int y = 0; y < MAP_HEIGHT; y++) {
 	for (int x = 0; x < MAP_WIDTH; x++) {
@@ -149,6 +163,7 @@ Map map_create() {
 	}}
 
 	return map;
+	*/
 }
 
 Room* map_get_room_from_tile(Map* map, int x, int y) {
@@ -163,4 +178,21 @@ Tile map_get_tile(Map* map, int x, int y) {
 	int room_y = y / ROOM_HEIGHT;
 	int tile_y = y % ROOM_HEIGHT;
 	return map->rooms[room_y][room_x].tiles[room_xy_idx(tile_x, tile_y)];
+}
+
+void map_set_tile(Map* map, int x, int y, Tile tile) {
+	int room_x = x / ROOM_WIDTH;
+	int tile_x = x % ROOM_WIDTH;
+	int room_y = y / ROOM_HEIGHT;
+	int tile_y = y % ROOM_HEIGHT;
+	room_set_tile(&map->rooms[room_y][room_x], tile_x, tile_y, tile);
+}
+
+static void map_add_fence(Map* room, FenceType type, int x, int y) {
+}
+
+Room* map_get_room_at(Map* map, int x, int y) {
+	int room_x = x / ROOM_WIDTH;
+	int room_y = y / ROOM_HEIGHT;
+	return &map->rooms[room_y][room_x];
 }

@@ -116,7 +116,7 @@ static inline void hero_update_animation(HeroHusk* hero, float dt) {
 			hero->animation.walk_tick -= WALK_DELAY;
 		}
 	} else {
-		hero->animation.flip_tick = FLIP_DELAY / 2.f;
+		hero->animation.flip_tick = FLIP_DELAY;
 		hero->animation.walk_tick = WALK_DELAY / 0.15f;
 	}
 }

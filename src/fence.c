@@ -36,8 +36,8 @@ Fence fence_create(FenceType type, int x, int y) {
 	rect.y += y;
 	fence.collider = collider_create(rect);
 	// collider_set_debug(fence.collider, true);
-	fence.position.x = x;
-	fence.position.y = y;
+	fence.position.x = x % SCREEN_WIDTH;
+	fence.position.y = y % SCREEN_HEIGHT;
 	fence.position.width = TILE_SIZE;
 	fence.position.height = TILE_SIZE;
 	return fence;
