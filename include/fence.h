@@ -18,6 +18,7 @@ typedef enum {
 
 
 typedef struct {
+	EntityId id;
 	FenceType type;
 	Rectangle position;
 	ColliderId collider;

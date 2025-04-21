@@ -65,7 +65,7 @@ static void handle_sync_state(size_t sender, MessageState* state) {
 	bool found = find_network_hero(sender, &network_hero);
 	assert(network_hero != NULL);
 	if (!found)
-		network_hero_set_state(network_hero, &state->network_hero);
+		network_hero_init(network_hero, &state->network_hero);
 	hero_husk_get_state(&network_hero->husk, &network_hero->previous);
 	network_hero_handle_sync(network_hero, &state->network_hero);
 }

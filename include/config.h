@@ -30,6 +30,7 @@ typedef enum {
 	INPUT_LEFT = KEY_LEFT,
 	INPUT_RIGHT = KEY_RIGHT,
 	INPUT_SWING = KEY_X,
+	INPUT_USE = KEY_C,
 } Input;
 
 

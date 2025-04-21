@@ -7,9 +7,18 @@
     "expandedProjectPaths": [
     ],
     "fileStates": {
+        "debug.tmx": {
+            "scale": 3,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 216,
+                "y": 168.16666666666666
+            }
+        }
     },
     "last.exportedFilePath": "/home/lumidev/projects/awaken-hero/assets/maps",
     "last.imagePath": "/home/lumidev/projects/awaken-hero/assets",
+    "last.objectTemplatePath": "/home/lumidev/projects/awaken-hero/assets/maps",
     "map.height": 72,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
@@ -19,6 +28,7 @@
     "openFiles": [
     ],
     "project": "awaken-hero.tiled-project",
+    "property.type": "PotLoot",
     "recentFiles": [
     ],
     "tileset.lastUsedFormat": "tsx",

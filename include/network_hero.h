@@ -2,6 +2,7 @@
 #define NETWORK_HERO_H
 
 
+#include "entity.h"
 #include "hero.h"
 
 
@@ -13,6 +14,7 @@ typedef struct {
 
 
 typedef struct {
+	EntityId id;
 	size_t owner;
 	double last_synced;
 	HeroHusk husk;
@@ -22,7 +24,7 @@ typedef struct {
 
 
 void hero_husk_get_state(HeroHusk* hero, NetworkHeroState* state);
-void network_hero_set_state(NetworkHero* hero, NetworkHeroState* state);
+void network_hero_init(NetworkHero* hero, NetworkHeroState* state);
 
 void network_hero_handle_sync(NetworkHero* hero, NetworkHeroState* state);
 void network_hero_handle_action(NetworkHero* hero);

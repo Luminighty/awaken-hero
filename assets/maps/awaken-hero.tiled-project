@@ -10,5 +10,106 @@
     "properties": [
     ],
     "propertyTypes": [
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 5,
+            "members": [
+                {
+                    "name": "loot",
+                    "propertyType": "ChestLoot",
+                    "type": "string",
+                    "value": "KEY"
+                }
+            ],
+            "name": "Chest",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
+            "id": 2,
+            "name": "ChestLoot",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "KEY",
+                "KEY_BOSS"
+            ],
+            "valuesAsFlags": false
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 1,
+            "members": [
+                {
+                    "name": "message",
+                    "type": "string",
+                    "value": "..."
+                }
+            ],
+            "name": "Owl",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 4,
+            "members": [
+                {
+                    "name": "loot",
+                    "propertyType": "PotLoot",
+                    "type": "string",
+                    "value": "NONE"
+                }
+            ],
+            "name": "Pot",
+            "type": "class",
+            "useAs": [
+                "property",
+                "map",
+                "layer",
+                "object",
+                "tile",
+                "tileset",
+                "wangcolor",
+                "wangset",
+                "project"
+            ]
+        },
+        {
+            "id": 3,
+            "name": "PotLoot",
+            "storageType": "string",
+            "type": "enum",
+            "values": [
+                "NONE",
+                "RANDOM",
+                "KEY",
+                "KEY_BOSS"
+            ],
+            "valuesAsFlags": false
+        }
     ]
 }

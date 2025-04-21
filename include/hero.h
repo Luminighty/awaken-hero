@@ -5,6 +5,7 @@
 #include <raymath.h>
 #include <stdbool.h>
 #include "collision.h"
+#include "entity.h"
 
 typedef enum {
 	DIR_DOWN,
@@ -50,6 +51,7 @@ typedef struct {
 
 
 typedef struct {
+	EntityId id;
 	HeroHusk husk;
 	ColliderId collider;
 	int room_x, room_y;

@@ -1,19 +1,26 @@
 #include "owl.h"
 
+#include "collision.h"
 #include "config.h"
+#include "entity.h"
+#include "log.h"
+#include "map.h"
 #include "textures.h"
+#include <stdio.h>
+#include <string.h>
+
+#define LOG_HEADER "OWL"
 
 #define TILE(x, y) (Rectangle){x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE}
 static Rectangle OWL_SPRITE = TILE(4, 3);
 
 Owl owl_create(int x, int y) {
 	Owl owl = {0};
+	owl.id = entity_create_id(ENTITY_OWL);
 	Rectangle rect = { .x = x, .y = y, .width = 16, .height = 16 };
-	owl.collider = collider_create(rect);
-	owl.position.x = x % SCREEN_WIDTH;
-	owl.position.y = y % SCREEN_HEIGHT;
-	owl.position.width = TILE_SIZE;
-	owl.position.height = TILE_SIZE;
+	owl.collider = collider_create(owl.id, rect, COLLISION_LAYER_OWL);
+	strcpy(owl.message, "It's dangerous to go alone.");
+	convert_global_to_room_roomtile(&owl.position, x, y);
 	return owl;
 }
 
@@ -33,3 +40,7 @@ void owl_render(Owl* owl) {
 	);
 }
 
+
+void owl_on_interact(Owl* owl) {
+	LOG("%s\n", owl->message);
+}

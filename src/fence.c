@@ -1,6 +1,8 @@
 #include "fence.h"
 #include "collision.h"
 #include "config.h"
+#include "entity.h"
+#include "map.h"
 #include "textures.h"
 #include <raylib.h>
 
@@ -30,16 +32,13 @@ static Rectangle FENCE_SPRITE[] = {
 
 Fence fence_create(FenceType type, int x, int y) {
 	Fence fence = {0};
+	fence.id = entity_create_id(ENTITY_FENCE);
 	fence.type = type;
 	Rectangle rect = FENCE_RECT[type];
 	rect.x += x;
 	rect.y += y;
-	fence.collider = collider_create(rect);
-	// collider_set_debug(fence.collider, true);
-	fence.position.x = x % SCREEN_WIDTH;
-	fence.position.y = y % SCREEN_HEIGHT;
-	fence.position.width = TILE_SIZE;
-	fence.position.height = TILE_SIZE;
+	fence.collider = collider_create(fence.id, rect, COLLISION_LAYER_FENCE);
+	convert_global_to_room_roomtile(&fence.position, x, y);
 	return fence;
 }
 

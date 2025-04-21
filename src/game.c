@@ -22,6 +22,7 @@ void game_create() {
 	game.camera.rotation = 0.0f;
 	game.camera.offset.x = SCREEN_WIDTH / 2.f;
 	game.camera.offset.y = SCREEN_HEIGHT / 2.f;
+
 }
 
 void game_destroy() {

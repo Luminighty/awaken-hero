@@ -1,17 +1,22 @@
 #include "hero.h"
 
 #include "config.h"
-#include "game.h"
+#include "entity.h"
 #include "log.h"
 #include "textures.h"
 #include "collision.h"
 #include "client.h"
+#include "utils.h"
+#include "owl.h"
 
 #include <math.h>
 #include <raylib.h>
 #include <raymath.h>
 #include <assert.h>
+#include <stdio.h>
 
+
+#define LOG_HEADER "HERO"
 
 static const Vector2 size = { 10, 10 };
 static const Vector2 origin = { 3, 6 };
@@ -20,20 +25,34 @@ static const float WALK_DELAY = 0.4f;
 static const float FLIP_DELAY = 0.2f;
 static const float SWING_DELAY = 0.3f;
 static const Vector2 ROOM_OFFSET = (Vector2){.x = 5.f, .y = 0.f };
+#define RAYCAST(_x, _y, _dx, _dy) (Raycast){ \
+	.origin = (Vector2){.x = _x, .y = _y}, \
+	.point = (Vector2){.x = _dx, .y = _dy} \
+}
+static const Raycast USE_RAYCAST[][2] = {
+	[DIR_DOWN] = { RAYCAST(0, size.y, 0, 4), RAYCAST(size.x, size.y, 0, 4) },
+	[DIR_UP] = { RAYCAST(0, 0, 0, -4), RAYCAST(size.x, 0, 0, -4) },
+	[DIR_LEFT] = { RAYCAST(0, 0, -4, 0), RAYCAST(0, size.y, -4, 0) },
+	[DIR_RIGHT] = { RAYCAST(size.x, 0, 4, 0), RAYCAST(size.x, size.y, 4, 0) },
+};
+
+#undef RAYCAST
 
 
 Hero hero_create() {
 	Hero hero = {0};
+	hero.id = entity_create_id(ENTITY_HERO);
 	hero.husk.position = (Rectangle){.x = 83, .y = 83, .width = TILE_SIZE, .height = TILE_SIZE};
 	hero.husk.facing = DIR_DOWN;
-	hero.collider = collider_create((Rectangle){
+	Rectangle rect = (Rectangle){
 		.x = hero.husk.position.x,
 		.y = hero.husk.position.y,
 		.width = size.x,
 		.height = size.y,
-	});
+	};
+	hero.collider = collider_create(hero.id, rect, COLLISION_LAYER_PLAYER);
 	hero.husk.animation.palette = HERO_PALETTE_PURPLE;
-	// collider_set_debug(hero.collider, true);
+	collider_set_debug(hero.collider, true);
 	return hero;
 }
 
@@ -45,6 +64,9 @@ static inline bool hero_can_walk(Hero* hero) {
 
 
 #define TO_TILE(pos) pos / TILE_SIZE
+
+
+static void handle_use(Hero* hero);
 
 void hero_update(Hero* hero) {
 	assert(hero);
@@ -82,10 +104,37 @@ void hero_update(Hero* hero) {
 		hero->husk.swing_tick = 0.f;
 		message_send_action((MessageAction){.action = ACTION_SWING});
 	}
+
+	if (IsKeyPressed(INPUT_USE))
+		handle_use(hero);
 	hero->husk.animation.is_moving = fabs(input.x) + fabs(input.y) > 0.1f;
 	hero_husk_update(&hero->husk);
 }
 
+static void handle_use(Hero* hero) {
+	static const CollisionLayer layer = COLLISION_LAYER_OWL;
+	RaycastHitResult result = {0};
+	bool found = false;
+	size_t cast_amount = sizeof(USE_RAYCAST[0]) / sizeof(USE_RAYCAST[0][0]);
+	for (size_t i = 0; i < cast_amount && !found; i++) {
+		Raycast cast = USE_RAYCAST[hero->husk.facing][i];
+		cast.origin = Vector2Add(cast.origin, AS_VEC(hero->husk.position));
+		found = collider_raycast_hit(cast, layer, &result);
+	}
+
+	if (!found) {
+		LOG("Hit nothing\n");
+		return;
+	}
+	switch (result.parent.type) {
+	case ENTITY_OWL:
+		owl_on_interact(entity_lookup(result.parent));
+		return;
+	default:
+		LOG("Hit %s\n", ENTITY_TYPE_TO_STR[result.parent.type]);
+		return;
+	}
+}
 
 void hero_husk_update(HeroHusk *hero) {
 	assert(hero);
@@ -202,5 +251,14 @@ void hero_render(HeroHusk* hero) {
 		0,
 		WHITE
 	);
+	draw_point(hero->position.x, hero->position.y, GREEN);
+
+	size_t cast_amount = sizeof(USE_RAYCAST[0]) / sizeof(USE_RAYCAST[0][0]);
+	for (size_t i = 0; i < cast_amount; i++) {
+		Raycast cast = USE_RAYCAST[hero->facing][i];
+		cast.origin = Vector2Add(cast.origin, AS_VEC(hero->position));
+		Vector2 to = Vector2Add(cast.origin, cast.point);
+		DrawLineEx(cast.origin, to, 1, RED);
+	}
 }
 

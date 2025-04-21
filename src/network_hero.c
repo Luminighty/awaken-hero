@@ -1,10 +1,11 @@
 #include "network_hero.h"
 #include "client.h"
+#include "entity.h"
 #include "hero.h"
 #include "log.h"
+#include <assert.h>
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 #include "config.h"
 
 #define LOG_HEADER "NETWORK_HERO"
@@ -16,7 +17,9 @@ void hero_husk_get_state(HeroHusk* hero, NetworkHeroState* state) {
 	state->palette = hero->animation.palette;
 }
 
-void network_hero_set_state(NetworkHero* hero, NetworkHeroState* state) {
+void network_hero_init(NetworkHero* hero, NetworkHeroState* state) {
+	assert(hero);
+	hero->id = entity_create_id(ENTITY_NETWORK_HERO);
 	hero->husk.position.x = state->position.x;
 	hero->husk.position.y = state->position.y;
 	hero->husk.position.width = TILE_SIZE;

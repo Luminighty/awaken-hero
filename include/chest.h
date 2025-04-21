@@ -6,6 +6,7 @@
 
 
 typedef struct {
+	EntityId id;
 	Rectangle position;
 	ColliderId collider;
 } Chest;
