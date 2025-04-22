@@ -19,8 +19,9 @@ Owl owl_create(int x, int y) {
 	owl.id = entity_create_id(ENTITY_OWL);
 	Rectangle rect = { .x = x, .y = y, .width = 16, .height = 16 };
 	owl.collider = collider_create(owl.id, rect, COLLISION_LAYER_OWL);
+	owl.position = rect;
+	// collider_set_debug(owl.collider, true);
 	strcpy(owl.message, "It's dangerous to go alone.");
-	convert_global_to_room_roomtile(&owl.position, x, y);
 	return owl;
 }
 

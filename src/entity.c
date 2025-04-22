@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "config.h"
+#include "door.h"
 #include "game.h"
 #include <assert.h>
 #include <stdint.h>
@@ -16,30 +17,15 @@ EntityId entity_create_id(EntityType type) {
 }
 
 
-inline static bool lookup_room(Room* room, EntityId id, void** result) {
-
-#define X(TYPE, _Type, ident, _amount) \
-case TYPE: \
-	for(int i = 0; i < room->ident ## _c; i++) \
-	if (room->ident ## s[i].id.id == id.id) { \
-		*result = &room->ident ## s[i]; \
-		return true; \
-	} \
-break; 
-
-	switch (id.type) {
-	default:
-		break;
-	MAP_ENTITY_TYPES
-	}
-	return false;
-
-#undef X
-}
-
-
 void* entity_lookup(EntityId id) {
-	void* result = NULL;
+	#define X(TYPE, _Type, ident, _amount) \
+	case TYPE: \
+	for(int i = 0; i < game.map.ident ## _c; i++) \
+		if (game.map.ident ## s[i].id.id == id.id) { \
+			return &game.map.ident ## s[i]; \
+		} \
+	break; 
+
 	switch (id.type) {
 	case ENTITY_HERO:
 		assert(game.hero.id.id == id.id);
@@ -49,13 +35,11 @@ void* entity_lookup(EntityId id) {
 		if (game.network_heroes[i].id.id == id.id)
 			return &game.network_heroes[i];
 		break;
+	MAP_ENTITY_TYPES
 	default:
-		for(int y = 0; y < MAP_HEIGHT; y++) {
-		for(int x = 0; x < MAP_WIDTH; x++) {
-			if (lookup_room(&game.map.rooms[y][x], id, &result))
-				return result;
-		}}
+		break;
 	}
+	#undef X
 	return NULL;
 }
 

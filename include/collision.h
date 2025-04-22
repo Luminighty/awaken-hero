@@ -17,6 +17,7 @@ typedef enum {
 	COLLISION_LAYER_POT = 1 << 4,
 	COLLISION_LAYER_OWL = 1 << 5,
 	COLLISION_LAYER_FENCE = 1 << 6,
+	COLLISION_LAYER_DOOR = 1 << 7,
 } CollisionLayer;
 
 

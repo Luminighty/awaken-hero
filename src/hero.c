@@ -1,6 +1,8 @@
 #include "hero.h"
 
+#include "chest.h"
 #include "config.h"
+#include "door.h"
 #include "entity.h"
 #include "log.h"
 #include "textures.h"
@@ -28,15 +30,21 @@ static const Vector2 ROOM_OFFSET = (Vector2){.x = 5.f, .y = 0.f };
 #define RAYCAST(_x, _y, _dx, _dy) (Raycast){ \
 	.origin = (Vector2){.x = _x, .y = _y}, \
 	.point = (Vector2){.x = _dx, .y = _dy} \
+#define TO_TILE(pos) pos / TILE_SIZE
 }
 static const Raycast USE_RAYCAST[][2] = {
-	[DIR_DOWN] = { RAYCAST(0, size.y, 0, 4), RAYCAST(size.x, size.y, 0, 4) },
-	[DIR_UP] = { RAYCAST(0, 0, 0, -4), RAYCAST(size.x, 0, 0, -4) },
-	[DIR_LEFT] = { RAYCAST(0, 0, -4, 0), RAYCAST(0, size.y, -4, 0) },
-	[DIR_RIGHT] = { RAYCAST(size.x, 0, 4, 0), RAYCAST(size.x, size.y, 4, 0) },
+	[DIR_DOWN] = { RAYCAST(1.5f, size.y, 0, 4), RAYCAST(size.x - 1.5f, size.y, 0, 4) },
+	[DIR_UP] = { RAYCAST(1.5f, 0, 1, -4), RAYCAST(size.x - 1.5f, 0, 0, -4) },
+	[DIR_LEFT] = { RAYCAST(0, 1.5f, -4, 0), RAYCAST(0, size.y - 1.5f, -4, 0) },
+	[DIR_RIGHT] = { RAYCAST(size.x, 1.5f, 4, 0), RAYCAST(size.x, size.y - 1.5f, 4, 0) },
 };
-
 #undef RAYCAST
+
+static void hero_update_animation(HeroHusk* hero, float dt);
+static Vector2 hero_walk(Hero* hero, float dt);
+static void handle_use(Hero* hero);
+static void handle_touch_use(Hero* hero);
+
 
 
 Hero hero_create() {
@@ -56,49 +64,18 @@ Hero hero_create() {
 	return hero;
 }
 
-static void hero_update_animation(HeroHusk* hero, float dt);
+
 
 static inline bool hero_can_walk(Hero* hero) {
 	return !hero->husk.swinging;
 }
 
 
-#define TO_TILE(pos) pos / TILE_SIZE
-
-
-static void handle_use(Hero* hero);
-
 void hero_update(Hero* hero) {
 	assert(hero);
 	float dt = GetFrameTime();
-	Vector2 input = {0};
-	if (hero_can_walk(hero)) {
-		if (IsKeyDown(INPUT_LEFT)) {
-			input.x = -1;
-			hero->husk.facing = DIR_LEFT;
-		}
-		if (IsKeyDown(INPUT_RIGHT)) {
-			input.x = 1;
-			hero->husk.facing = DIR_RIGHT;
-		}
-		if (IsKeyDown(INPUT_DOWN)) {
-			input.y = 1;
-			hero->husk.facing = DIR_DOWN;
-		}
-		if (IsKeyDown(INPUT_UP)) {
-			input.y = -1;
-			hero->husk.facing = DIR_UP;
-		}
-		Vector2 velocity = Vector2Scale(Vector2Normalize(input), HERO_SPEED * dt);
-		collider_move(hero->collider, (Vector2){.x = velocity.x});
-		Vector2 new_position = collider_move(hero->collider, (Vector2){.y = velocity.y});
-		hero->husk.position.x = new_position.x;
-		hero->husk.position.y = new_position.y;
-		hero->room_x = (ROOM_OFFSET.x + new_position.x) / TILE_SIZE / ROOM_WIDTH;
-		hero->room_y = (ROOM_OFFSET.y + new_position.y) / TILE_SIZE / ROOM_HEIGHT;
-//		game.camera.target.x = hero->room_x * ROOM_WIDTH * TILE_SIZE;
-//		game.camera.target.y = hero->room_y * ROOM_HEIGHT * TILE_SIZE;
-	}
+	Vector2 input = hero_walk(hero, dt);
+
 	if (!hero->husk.swinging && IsKeyPressed(INPUT_SWING)) {
 		hero->husk.swinging = true;
 		hero->husk.swing_tick = 0.f;
@@ -111,30 +88,90 @@ void hero_update(Hero* hero) {
 	hero_husk_update(&hero->husk);
 }
 
-static void handle_use(Hero* hero) {
-	static const CollisionLayer layer = COLLISION_LAYER_OWL;
-	RaycastHitResult result = {0};
+
+static Vector2 hero_walk(Hero* hero, float dt) {
+	if (!hero_can_walk(hero))
+		return (Vector2){0};
+	Vector2 input = {0};
+	if (IsKeyDown(INPUT_LEFT)) {
+		input.x = -1;
+		hero->husk.facing = DIR_LEFT;
+	}
+	if (IsKeyDown(INPUT_RIGHT)) {
+		input.x = 1;
+		hero->husk.facing = DIR_RIGHT;
+	}
+	if (IsKeyDown(INPUT_DOWN)) {
+		input.y = 1;
+		hero->husk.facing = DIR_DOWN;
+	}
+	if (IsKeyDown(INPUT_UP)) {
+		input.y = -1;
+		hero->husk.facing = DIR_UP;
+	}
+	Vector2 velocity = Vector2Scale(Vector2Normalize(input), HERO_SPEED * dt);
+	collider_move(hero->collider, (Vector2){.x = velocity.x});
+	Vector2 new_position = collider_move(hero->collider, (Vector2){.y = velocity.y});
+	hero->husk.position.x = new_position.x;
+	hero->husk.position.y = new_position.y;
+	hero->room_x = (ROOM_OFFSET.x + new_position.x) / TILE_SIZE / ROOM_WIDTH;
+	hero->room_y = (ROOM_OFFSET.y + new_position.y) / TILE_SIZE / ROOM_HEIGHT;
+//	game.camera.target.x = hero->room_x * ROOM_WIDTH * TILE_SIZE;
+//	game.camera.target.y = hero->room_y * ROOM_HEIGHT * TILE_SIZE;
+	if (input.x != 0 || input.y != 0)
+		handle_touch_use(hero);
+	return input;
+}
+
+
+static inline bool raycast_hit(Hero* hero, CollisionLayer layer, RaycastHitResult* result) {
 	bool found = false;
 	size_t cast_amount = sizeof(USE_RAYCAST[0]) / sizeof(USE_RAYCAST[0][0]);
 	for (size_t i = 0; i < cast_amount && !found; i++) {
 		Raycast cast = USE_RAYCAST[hero->husk.facing][i];
 		cast.origin = Vector2Add(cast.origin, AS_VEC(hero->husk.position));
-		found = collider_raycast_hit(cast, layer, &result);
+		found = collider_raycast_hit(cast, layer, result);
 	}
+	return found;
+}
 
-	if (!found) {
-		LOG("Hit nothing\n");
+
+static void handle_touch_use(Hero* hero) {
+	static const CollisionLayer layer = COLLISION_LAYER_DOOR;
+	RaycastHitResult result = {0};
+	if (!raycast_hit(hero, layer, &result))
+		return;
+	switch (result.parent.type) {
+	case ENTITY_DOOR:
+		door_on_interact(entity_lookup(result.parent), hero);
+		return;
+	default:
+		LOG("Tried to touch use '%s'\n", ENTITY_TYPE_TO_STR[result.parent.type]);
+		return;
+	}
+}
+
+
+static void handle_use(Hero* hero) {
+	static const CollisionLayer layer = COLLISION_LAYER_OWL | COLLISION_LAYER_CHEST;
+	RaycastHitResult result = {0};
+	if (!raycast_hit(hero, layer, &result)) {
+		LOG("No interactions.\n");
 		return;
 	}
 	switch (result.parent.type) {
 	case ENTITY_OWL:
 		owl_on_interact(entity_lookup(result.parent));
 		return;
+	case ENTITY_CHEST:
+		chest_on_interact(entity_lookup(result.parent), hero);
+		return;
 	default:
-		LOG("Hit %s\n", ENTITY_TYPE_TO_STR[result.parent.type]);
+		LOG("Interact with '%s'\n", ENTITY_TYPE_TO_STR[result.parent.type]);
 		return;
 	}
 }
+
 
 void hero_husk_update(HeroHusk *hero) {
 	assert(hero);
@@ -251,7 +288,7 @@ void hero_render(HeroHusk* hero) {
 		0,
 		WHITE
 	);
-	draw_point(hero->position.x, hero->position.y, GREEN);
+	// draw_point(hero->position.x, hero->position.y, GREEN);
 
 	size_t cast_amount = sizeof(USE_RAYCAST[0]) / sizeof(USE_RAYCAST[0][0]);
 	for (size_t i = 0; i < cast_amount; i++) {

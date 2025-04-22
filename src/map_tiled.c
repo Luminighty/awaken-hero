@@ -1,7 +1,10 @@
 #include "map_tiled.h"
 
+#include "chest.h"
 #include "config.h"
+#include "door.h"
 #include "json.h"
+#include "log.h"
 #include "map.h"
 #include "tile.h"
 #include "utils.h"
@@ -10,6 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
+
+#define LOG_HEADER "MAP_TILED"
 
 #define TILED_GUID unsigned int
 
@@ -30,6 +35,15 @@ typedef enum {
 	OBJECT_POT,
 	OBJECT_CHEST,
 	OBJECT_OWL,
+	OBJECT_KEYDOOR,
+
+	// NOTE: Make sure the order of these match up to DOOR_TYPE_X
+	OBJECT_DOOR_MONSTER,
+	OBJECT_DOOR_KEY,
+	OBJECT_DOOR_BOSS,
+	OBJECT_DOOR_ONEWAY,
+	OBJECT_DOOR_ONEWAY_EXIT,
+	OBJECT_DOOR_KEYBLOCK,
 } TileObject;
 
 
@@ -74,6 +88,8 @@ Map map_tiled_load(const char *filename) {
 
 
 static JsonValue* find_property_value(JsonValue* properties, char* property) {
+	if (!properties)
+		return NULL;
 	int length = json_array_length(properties);
 	for (int i = 0; i < length; i++) {
 		JsonValue* property_object = json_array_get(properties, i);
@@ -82,6 +98,37 @@ static JsonValue* find_property_value(JsonValue* properties, char* property) {
 			return json_object_get(property_object, "value");
 	}
 	return NULL;
+}
+
+static void object_owl(Map* map, int x, int y, JsonValue* properties) {
+	assert_array_push(map->owls, map->owl_c);
+	Owl owl = owl_create(x, y);
+	JsonValue* message = find_property_value(properties, "message");
+	if (message)
+		strcpy(owl.message, json_as_string(message)->string);
+	map->owls[map->owl_c++] = owl;
+}
+
+static void object_chest(Map* map, int x, int y, JsonValue* properties) {
+	static const char* loot_table[] =  {
+		[CHEST_LOOT_NOTHING] = "NOTHING",
+		[CHEST_LOOT_RANDOM] = "RANDOM",
+		[CHEST_LOOT_KEY] = "KEY",
+		[CHEST_LOOT_BOSSKEY] = "KEY_BOSS",
+	};
+	static const int loot_table_length = sizeof(loot_table) / sizeof(loot_table[0]);
+	assert_array_push(map->chests, map->chest_c);
+	ChestLoot loot = CHEST_LOOT_NOTHING;
+	JsonValue* prop_loot = find_property_value(properties, "loot");
+
+	if (prop_loot) {
+		JsonString* loot_str = json_as_string(prop_loot);
+		for (int i = 0; i < loot_table_length; i++)
+			if (strcmp(loot_table[i], loot_str->string) == 0)
+				loot = i;
+	}
+
+	map->chests[map->chest_c++] = chest_create(x, y, loot);
 }
 
 static void read_objectgroup(Map* map, JsonValue* layer, int width) {
@@ -97,13 +144,11 @@ static void read_objectgroup(Map* map, JsonValue* layer, int width) {
 
 		Room* room = map_get_room_at(map, x / TILE_SIZE, y / TILE_SIZE);
 		if (strcmp(template->string, "owl.tx") == 0) {
-			printf("OWL FOUND\n");
-			assert_array_push(room->owls, room->owl_c);
-			Owl owl = owl_create(x, y);
-			JsonValue* message = find_property_value(properties, "message");
-			if (message)
-				strcpy(owl.message, json_as_string(message)->string);
-			room->owls[room->owl_c++] = owl;
+			object_owl(map, x, y, properties);
+		} else if (strcmp(template->string, "chest.tx") == 0) {
+			object_chest(map, x, y, properties);
+		} else {
+			LOG("Unknown template '%s'", template->string);
 		}
 		// TODO: Add other templates
 	}
@@ -133,7 +178,6 @@ static void read_tilelayer(Map* map, JsonValue* layer, int width) {
 }
 
 static void tile_object_create(Map* map, int x, int y, TileObject object) {
-	Room* room = map_get_room_at(map, x, y);
 	switch (object) {
 	case OBJECT_SPAWN:
 		map->spawn_x = x;
@@ -146,23 +190,35 @@ static void tile_object_create(Map* map, int x, int y, TileObject object) {
 	case OBJECT_FENCE_L:
 	case OBJECT_FENCE_R:
 	case OBJECT_FENCE_T:
-	case OBJECT_FENCE_B:
-		assert_array_push(room->fences, room->fence_c);
+	case OBJECT_FENCE_B: {
+		assert_array_push(map->fences, map->fence_c);
 		FenceType type = object - OBJECT_FENCE_TL;
-		room->fences[room->fence_c++] = fence_create(type, x * TILE_SIZE, y * TILE_SIZE);
+		map->fences[map->fence_c++] = fence_create(type, x * TILE_SIZE, y * TILE_SIZE);
 		break;
+	}
 	case OBJECT_POT:
-		assert_array_push(room->pots, room->pot_c);
-		room->pots[room->pot_c++] = pot_create(x * TILE_SIZE, y * TILE_SIZE);
+		assert_array_push(map->pots, map->pot_c);
+		map->pots[map->pot_c++] = pot_create(x * TILE_SIZE, y * TILE_SIZE);
 		break;
 	case OBJECT_CHEST:
-		assert_array_push(room->chests, room->chest_c);
-		room->chests[room->chest_c++] = chest_create(x * TILE_SIZE, y * TILE_SIZE);
+		assert_array_push(map->chests, map->chest_c);
+		map->chests[map->chest_c++] = chest_create(x * TILE_SIZE, y * TILE_SIZE, CHEST_LOOT_NOTHING);
 		break;
 	case OBJECT_OWL:
-		assert_array_push(room->owls, room->owl_c);
-		room->owls[room->owl_c++] = owl_create(x * TILE_SIZE, y * TILE_SIZE);
+		assert_array_push(map->owls, map->owl_c);
+		map->owls[map->owl_c++] = owl_create(x * TILE_SIZE, y * TILE_SIZE);
 		break;
+	case OBJECT_DOOR_MONSTER:
+	case OBJECT_DOOR_KEY:
+	case OBJECT_DOOR_BOSS:
+	case OBJECT_DOOR_ONEWAY:
+	case OBJECT_DOOR_ONEWAY_EXIT:
+	case OBJECT_DOOR_KEYBLOCK: {
+		assert_array_push(map->owls, map->owl_c);
+		DoorType type = object - OBJECT_DOOR_MONSTER;
+		map->doors[map->door_c++] = door_create(x * TILE_SIZE, y * TILE_SIZE, type);
+		break;
+	}
 	default:
 		printf("TileObject %d not implemented yet.\n", object);
 		assert(0);
@@ -220,6 +276,14 @@ static TileObject TILED_TO_TILEOBJECT[] = {
 	[61] = OBJECT_POT,
 	[50] = OBJECT_CHEST,
 	[34] = OBJECT_OWL,
+
+	
+	[40] = OBJECT_DOOR_MONSTER,
+	[41] = OBJECT_DOOR_KEY,
+	[42] = OBJECT_DOOR_BOSS,
+	[53] = OBJECT_DOOR_ONEWAY,
+	[43] = OBJECT_DOOR_ONEWAY_EXIT,
+	[52] = OBJECT_DOOR_KEYBLOCK,
 };
 
 #define str(s) #s
@@ -236,4 +300,17 @@ assert_fence(FENCE_L);
 assert_fence(FENCE_R);
 assert_fence(FENCE_T);
 assert_fence(FENCE_B);
+#undef assert_fence
+
+
+#define assert_door(door)\
+	static_assert(\
+	OBJECT_DOOR_ ## door - OBJECT_DOOR_MONSTER == DOOR_TYPE_ ##  door, \
+	"Invalid door mapping! OBJECT_" #door " -> " #door ". ");
+assert_door(MONSTER)
+assert_door(KEY)
+assert_door(BOSS)
+assert_door(ONEWAY)
+assert_door(ONEWAY_EXIT)
+assert_door(KEYBLOCK)
 #undef assert_fence

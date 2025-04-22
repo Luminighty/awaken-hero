@@ -6,10 +6,11 @@
 
 // NOTE: ENTITY_TYPE, TypeDef, identifier, max_amount/room
 #define MAP_ENTITY_TYPES \
-	X(ENTITY_OWL, Owl, owl, 4) \
-	X(ENTITY_POT, Pot, pot, 16) \
-	X(ENTITY_CHEST, Chest, chest, 8) \
-	X(ENTITY_FENCE, Fence, fence, 32) \
+	X(ENTITY_OWL, Owl, owl, 8) \
+	X(ENTITY_POT, Pot, pot, 64) \
+	X(ENTITY_CHEST, Chest, chest, 64) \
+	X(ENTITY_FENCE, Fence, fence, 64) \
+	X(ENTITY_DOOR, Door, door, 64) \
 
 
 #define X(type, ...) type ,

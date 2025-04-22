@@ -28,6 +28,7 @@ void game_create() {
 void game_destroy() {
 	textures_destroy();
 	network_client_destroy();
+	map_print_profiler(&game.map);
 	CloseWindow();
 }
 
@@ -52,8 +53,9 @@ void game_render() {
 
 	ClearBackground(BLACK);
 	map_render(&game.map, game.hero.room_x, game.hero.room_y);
-
 	BeginMode2D(game.camera);
+
+	map_objects_render(&game.map);
 	
 	for (size_t i = 0; i < game.network_hero_count; i++)
 		network_hero_render(&game.network_heroes[i]);

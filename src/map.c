@@ -3,14 +3,17 @@
 #include "config.h"
 #include "entity.h"
 #include "fence.h"
+#include "log.h"
 #include "map_tiled.h"
 #include "pot.h"
+#include "door.h"
 #include "textures.h"
 #include "tile.h"
 
 #include <raylib.h>
 #include <assert.h>
 
+#define LOG_HEADER "MAP"
 
 static inline void room_set_tile(Room* room, int x, int y, Tile tile) { 
 	room->tiles[y * ROOM_WIDTH + x] = tile;
@@ -26,6 +29,9 @@ static inline int room_xy_idx(int x, int y) {
 	for (int y = 0; y < ROOM_HEIGHT; y++)\
 	for (int x = 0; x < ROOM_WIDTH; x++)
 
+#define FOR_ROOMS(x, y) \
+	for (int y = 0; y < MAP_HEIGHT; y++)\
+	for (int x = 0; x < MAP_WIDTH; x++)
 
 static inline Rectangle rect_tile_dest(int x, int y) {
 	return (Rectangle){
@@ -50,17 +56,20 @@ static void room_render(Room* room) {
 			WHITE
 		);
 	}
-
-	#define X(_1, _2, ident, _3) \
-	for (int i = 0; i < room->ident ## _c; i++) \
-		ident ## _render(&room->ident ## s[i]);
-	MAP_ENTITY_TYPES
-	#undef X
 }
 
 
+// NOTE: I broke up map_render and map_objects_render since we're using the camera in one of them, and not the other
 void map_render(Map* map, int room_x, int room_y) {
 	room_render(&map->rooms[room_y][room_x]);
+}
+
+void map_objects_render(Map *map) {
+	#define X(_1, _2, ident, _3) \
+	for (int i = 0; i < map->ident ## _c; i++) \
+		ident ## _render(&map->ident ## s[i]);
+	MAP_ENTITY_TYPES
+	#undef X
 }
 
 
@@ -108,5 +117,18 @@ void convert_global_to_room_roomtile(Rectangle* position, int x, int y) {
 	position->y = y % SCREEN_HEIGHT;
 	position->width = TILE_SIZE;
 	position->height = TILE_SIZE;
+}
+
+void map_print_profiler(Map* map) {
+	LOG("Memory used %lu bytes.\n", sizeof(*map));
+	LOG("\tRooms: %zu bytes.\n", sizeof(map->rooms));
+
+	#define X(_T, type, ident, amount) \
+	size_t ident##_c = map->ident##_c; \
+	size_t ident##_space = amount; \
+	size_t ident##_bytes = sizeof(map->ident##s); \
+	LOG("\t" #type ": %zu/%zu using %zu bytes.\n", ident##_c, ident##_space, ident##_bytes);
+	MAP_ENTITY_TYPES
+	#undef X
 }
 

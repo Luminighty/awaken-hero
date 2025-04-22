@@ -51,9 +51,16 @@ typedef struct {
 
 
 typedef struct {
+	short keys;
+	bool boss_key;
+} Inventory;
+
+
+typedef struct {
 	EntityId id;
 	HeroHusk husk;
 	ColliderId collider;
+	Inventory inventory;
 	int room_x, room_y;
 } Hero;
 

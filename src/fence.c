@@ -34,11 +34,18 @@ Fence fence_create(FenceType type, int x, int y) {
 	Fence fence = {0};
 	fence.id = entity_create_id(ENTITY_FENCE);
 	fence.type = type;
+
 	Rectangle rect = FENCE_RECT[type];
 	rect.x += x;
 	rect.y += y;
 	fence.collider = collider_create(fence.id, rect, COLLISION_LAYER_FENCE);
-	convert_global_to_room_roomtile(&fence.position, x, y);
+	// collider_set_debug(fence.collider, true);
+
+	rect.width = TILE_SIZE;
+	rect.height = TILE_SIZE;
+	rect.x = x;
+	rect.y = y;
+	fence.position = rect;
 	return fence;
 }
 

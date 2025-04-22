@@ -86,9 +86,7 @@ static inline bool rect_intersects(Rectangle left, Rectangle right) {
 }
 
 static inline bool collides_with(Collider* other, Rectangle area) {
-	if (rect_intersects(area, other->area))
-		return true;
-	return false;
+	return other->enabled && rect_intersects(area, other->area);
 }
 
 Vector2 collider_move(ColliderId id, Vector2 delta) {

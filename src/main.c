@@ -7,14 +7,18 @@
 #include <string.h>
 
 
+static void late_init() {
+	printf("Map size: %lu\n", sizeof(Map));
+}
+
 int main(int argc, char* argv[]) {
 	for (int i = 0; i < argc; i++)
 		printf("argv[%d] = %s\n", i, argv[i]);
 	if (argc > 1 && strcmp(argv[1], "--server") == 0)
 		return server_main();
 
-	printf("Map size: %lu", sizeof(Map));
 	game_create();
+	late_init();
 	while(game_is_running()) {
 		game_update();
 		game_render();

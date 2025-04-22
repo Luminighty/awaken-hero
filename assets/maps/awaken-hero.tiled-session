@@ -3,17 +3,31 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "debug.tmx",
     "expandedProjectPaths": [
+        ".",
+        "/home/lumidev/projects/awaken-hero/assets/objects"
     ],
     "fileStates": {
-        "debug.tmx": {
+        "debug.json": {
             "scale": 3,
             "selectedLayer": 2,
             "viewCenter": {
-                "x": 216,
-                "y": 168.16666666666666
+                "x": 144.33333333333334,
+                "y": 288.16666666666663
             }
+        },
+        "debug.tmx": {
+            "scale": 3,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 391.8333333333333,
+                "y": 272.16666666666663
+            }
+        },
+        "tileset_base.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 5.5
         }
     },
     "last.exportedFilePath": "/home/lumidev/projects/awaken-hero/assets/maps",
@@ -26,10 +40,15 @@
     "map.tileWidth": 16,
     "map.width": 88,
     "openFiles": [
+        "tileset_base.tsx",
+        "debug.tmx"
     ],
     "project": "awaken-hero.tiled-project",
     "property.type": "PotLoot",
     "recentFiles": [
+        "tileset_base.tsx",
+        "debug.tmx",
+        "debug.json"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
