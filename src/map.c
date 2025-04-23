@@ -94,7 +94,7 @@ Tile map_get_tile(Map* map, int x, int y) {
 }
 
 
-void map_set_tile(Map* map, int x, int y, Tile tile) {
+void map_set_tile(Map* map, int x, int y, Tile tile, TileFlipFlag tileflags) {
 	int room_x = x / ROOM_WIDTH;
 	int tile_x = x % ROOM_WIDTH;
 	int room_y = y / ROOM_HEIGHT;

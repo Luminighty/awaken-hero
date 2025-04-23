@@ -13,6 +13,7 @@ Game game = {0};
 
 void game_create() {
 	InitWindow(WIN_WIDTH, WIN_HEIGHT, TITLE);
+	HideCursor();
 	textures_create();
 	network_client_create();
 	game.map = map_create();
@@ -22,7 +23,6 @@ void game_create() {
 	game.camera.rotation = 0.0f;
 	game.camera.offset.x = SCREEN_WIDTH / 2.f;
 	game.camera.offset.y = SCREEN_HEIGHT / 2.f;
-
 }
 
 void game_destroy() {

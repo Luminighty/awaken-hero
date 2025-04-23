@@ -76,7 +76,7 @@ static void handle_action(size_t sender, MessageAction* action) {
 	assert(network_hero != NULL);
 	switch (action->action) {
 	case ACTION_SWING:
-		network_hero_handle_action(network_hero);
+		network_hero_handle_action(network_hero, action->x, action->y);
 			break;
 		default:
 			assert(0);

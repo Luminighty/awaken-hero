@@ -43,6 +43,7 @@ typedef struct {
 
 typedef struct {
 	Rectangle position;
+	Vector2 sprite_offset;
 	Direction facing;
 	HeroAnimState animation;
 	bool swinging;

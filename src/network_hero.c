@@ -7,6 +7,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include "config.h"
+#include "message.h"
 
 #define LOG_HEADER "NETWORK_HERO"
 
@@ -38,9 +39,14 @@ void network_hero_handle_sync(NetworkHero* hero, NetworkHeroState* state) {
 	hero->husk.facing = state->facing;
 }
 
-void network_hero_handle_action(NetworkHero* hero) {
+void network_hero_handle_action(NetworkHero* hero, float x, float y) {
 	// TODO: Do action based on message
 	LOG("Hero %zu action received.\n", hero->owner);
+	hero->target.position.x = x;
+	hero->target.position.y = y;
+	hero->husk.position.x = x;
+	hero->husk.position.y = y;
+
 	hero->husk.swinging = true;
 	hero->husk.swing_tick = 0.f;
 }

@@ -3,6 +3,7 @@
 
 #include <raylib.h>
 
+
 typedef enum {
 	TILE_NONE = 0,
 	TILE_WALL_TL,
@@ -33,6 +34,13 @@ typedef enum {
 	TILE_TORCH,
 	TILE_CAULDRON,
 } Tile;
+
+
+typedef enum {
+	TILE_FLIP_D = 1 << 0,
+	TILE_FLIP_V = 1 << 1,
+	TILE_FLIP_H = 1 << 2,
+} TileFlipFlag;
 
 
 extern Rectangle TILE_RECT[];

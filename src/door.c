@@ -5,7 +5,9 @@
 #include "entity.h"
 #include "log.h"
 #include "textures.h"
+#include "tile.h"
 #include <assert.h>
+#include <raylib.h>
 
 #define LOG_HEADER "DOOR"
 
@@ -21,9 +23,10 @@ static Rectangle DOOR_SPRITE[] = {
 
 
 // TODO: Add door rotations
-Door door_create(int x, int y, DoorType type) {
+Door door_create(int x, int y, DoorType type, TileFlipFlag flipflags) {
 	Door door = {0};
 	door.type = type;
+	door.flipflags = flipflags;
 	door.id = entity_create_id(ENTITY_DOOR);
 	Rectangle rect = { .x = x, .y = y, .width = TILE_SIZE, .height = TILE_SIZE };
 	door.collider = collider_create(door.id, rect, COLLISION_LAYER_DOOR);
@@ -38,14 +41,33 @@ void door_destroy(Door* door) {
 }
 
 
+
 void door_render(Door* door) {
 	if (door->is_open)
 		return;
+	static const Vector2 origin = {TILE_SIZE / 2.f, TILE_SIZE / 2.f};
+	Rectangle sprite = DOOR_SPRITE[door->type];
+	float rotation = 0.f;
+	TileFlipFlag flags = door->flipflags;
+	if (flags & TILE_FLIP_D) {
+		flags ^= TILE_FLIP_H;
+		rotation = 270.f;
+	}
+	if (flags & TILE_FLIP_H)
+		sprite.width *= -1;
+	if (flags & TILE_FLIP_V)
+		sprite.height *= -1;
 	DrawTexturePro(
 		textures.tileset,
 		DOOR_SPRITE[door->type],
-		door->position,
-		(Vector2){0, 0}, 0,
+		(Rectangle){
+			.x = door->position.x + origin.x,
+			.y = door->position.y + origin.y,
+			.width = door->position.width,
+			.height = door->position.height,
+		},
+		origin,
+		rotation,
 		WHITE
 	);
 }

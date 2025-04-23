@@ -27,7 +27,7 @@ void hero_husk_get_state(HeroHusk* hero, NetworkHeroState* state);
 void network_hero_init(NetworkHero* hero, NetworkHeroState* state);
 
 void network_hero_handle_sync(NetworkHero* hero, NetworkHeroState* state);
-void network_hero_handle_action(NetworkHero* hero);
+void network_hero_handle_action(NetworkHero* hero, float x, float y);
 void network_hero_update(NetworkHero* hero);
 void network_hero_render(NetworkHero* hero);
 

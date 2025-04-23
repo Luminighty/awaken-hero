@@ -54,10 +54,10 @@ static TileObject TILED_TO_TILEOBJECT[];
 static const TILED_GUID TILED_FLIP_H =  0x80000000;
 static const TILED_GUID TILED_FLIP_V =  0x40000000;
 static const TILED_GUID TILED_FLIP_D =  0x20000000;
-static const TILED_GUID TILED_ROTATED = 0x10000000;
-static const TILED_GUID TILED_GUID_PART = ~(TILED_FLIP_H | TILED_FLIP_V | TILED_FLIP_D | TILED_ROTATED);
+static const TILED_GUID TILED_HEXA_ROTATED = 0x10000000;
+static const TILED_GUID TILED_GUID_PART = ~(TILED_FLIP_H | TILED_FLIP_V | TILED_FLIP_D | TILED_HEXA_ROTATED);
 
-static void tile_object_create(Map* map, int x, int y, TileObject object);
+static void tile_object_create(Map* map, int x, int y, TileObject object, TileFlipFlag flipflags);
 static void read_tilelayer(Map* map, JsonValue* layer, int width);
 static void read_objectgroup(Map* map, JsonValue* layer, int width);
 
@@ -163,21 +163,29 @@ static void read_tilelayer(Map* map, JsonValue* layer, int width) {
 		int x = j % width;
 		int y = j / width;
 		TILED_GUID id = json_as_number(json_array_get(data, j));
+		bool flip_h = id & TILED_FLIP_H;
+		bool flip_v = id & TILED_FLIP_V;
+		bool flip_d = id & TILED_FLIP_D;
 		id = id & TILED_GUID_PART;
 		if (id == 0)
 			continue;
 		id--;
+		TileFlipFlag flipflags = 
+			(flip_h ? TILE_FLIP_H : 0) | 
+			(flip_v ? TILE_FLIP_V : 0) | 
+			(flip_d ? TILE_FLIP_D : 0);
+
 		Tile tile = TILED_TO_TILE[id];
 		if (tile != TILE_NONE)
-			map_set_tile(map, x, y, tile);
+			map_set_tile(map, x, y, tile, flipflags);
 		TileObject object = TILED_TO_TILEOBJECT[id];
 		if (object != OBJECT_NONE)
-			tile_object_create(map, x, y, object);
+			tile_object_create(map, x, y, object, flipflags);
 	}
 	
 }
 
-static void tile_object_create(Map* map, int x, int y, TileObject object) {
+static void tile_object_create(Map* map, int x, int y, TileObject object, TileFlipFlag flipflags) {
 	switch (object) {
 	case OBJECT_SPAWN:
 		map->spawn_x = x;
@@ -216,7 +224,7 @@ static void tile_object_create(Map* map, int x, int y, TileObject object) {
 	case OBJECT_DOOR_KEYBLOCK: {
 		assert_array_push(map->owls, map->owl_c);
 		DoorType type = object - OBJECT_DOOR_MONSTER;
-		map->doors[map->door_c++] = door_create(x * TILE_SIZE, y * TILE_SIZE, type);
+		map->doors[map->door_c++] = door_create(x * TILE_SIZE, y * TILE_SIZE, type, flipflags);
 		break;
 	}
 	default:
