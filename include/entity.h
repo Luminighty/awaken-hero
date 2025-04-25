@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+
 // NOTE: ENTITY_TYPE, TypeDef, identifier, max_amount/room
 #define MAP_ENTITY_TYPES \
 	X(ENTITY_OWL, Owl, owl, 8) \

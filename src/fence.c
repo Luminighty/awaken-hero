@@ -30,6 +30,7 @@ static Rectangle FENCE_SPRITE[] = {
 	[FENCE_B] = TILE(7, 5),
 };
 
+
 Fence fence_create(FenceType type, int x, int y) {
 	Fence fence = {0};
 	fence.id = entity_create_id(ENTITY_FENCE);
@@ -49,9 +50,11 @@ Fence fence_create(FenceType type, int x, int y) {
 	return fence;
 }
 
+
 void fence_destroy(Fence *fence) {
 	collider_destroy(fence->collider);
 }
+
 
 void fence_render(Fence *fence) {
 	DrawTexturePro(

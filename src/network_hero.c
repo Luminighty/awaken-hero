@@ -11,12 +11,14 @@
 
 #define LOG_HEADER "NETWORK_HERO"
 
+
 void hero_husk_get_state(HeroHusk* hero, NetworkHeroState* state) {
 	state->position.x = hero->position.x;
 	state->position.y = hero->position.y;
 	state->facing = hero->facing;
 	state->palette = hero->animation.palette;
 }
+
 
 void network_hero_init(NetworkHero* hero, NetworkHeroState* state) {
 	assert(hero);
@@ -31,6 +33,7 @@ void network_hero_init(NetworkHero* hero, NetworkHeroState* state) {
 	hero->target = *state;
 }
 
+
 void network_hero_handle_sync(NetworkHero* hero, NetworkHeroState* state) {
 	hero->previous = hero->target;
 	hero->target = *state;
@@ -40,7 +43,6 @@ void network_hero_handle_sync(NetworkHero* hero, NetworkHeroState* state) {
 }
 
 void network_hero_handle_action(NetworkHero* hero, float x, float y) {
-	// TODO: Do action based on message
 	LOG("Hero %zu action received.\n", hero->owner);
 	hero->target.position.x = x;
 	hero->target.position.y = y;
@@ -53,7 +55,6 @@ void network_hero_handle_action(NetworkHero* hero, float x, float y) {
 
 
 void network_hero_update(NetworkHero* hero) {
-	// TODO: Interpolate data
 	float dt = GetFrameTime();
 	float time = GetTime();
 	float progress = (time - hero->last_synced) / NETWORK_SYNC_DELAY;

@@ -92,6 +92,7 @@ static Vector2 hero_walk(Hero* hero, float dt);
 static void handle_use(Hero* hero);
 static void handle_touch_use(Hero* hero);
 
+
 void hero_update(Hero* hero) {
 	assert(hero);
 	float dt = GetFrameTime();
@@ -112,6 +113,7 @@ void hero_update(Hero* hero) {
 	hero->husk.animation.is_moving = fabs(input.x) + fabs(input.y) > 0.1f;
 	hero_husk_update(&hero->husk);
 }
+
 
 static Vector2 hero_walk(Hero* hero, float dt) {
 	if (!hero_can_walk(hero))
@@ -159,6 +161,7 @@ static inline bool raycast_hit(Hero* hero, CollisionLayer layer, RaycastHitResul
 	return found;
 }
 
+
 static void handle_touch_use(Hero* hero) {
 	static const CollisionLayer layer = COLLISION_LAYER_DOOR;
 	RaycastHitResult result = {0};
@@ -173,6 +176,7 @@ static void handle_touch_use(Hero* hero) {
 		return;
 	}
 }
+
 
 static void handle_use(Hero* hero) {
 	static const CollisionLayer layer = COLLISION_LAYER_OWL | COLLISION_LAYER_CHEST;
@@ -323,6 +327,7 @@ static inline void sword_render(HeroHusk* hero) {
 		WHITE
 	);
 }
+
 
 void hero_render(HeroHusk* hero) {
 	assert(hero->position.width > 0 && hero->position.height > 0);

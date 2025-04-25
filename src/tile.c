@@ -85,6 +85,7 @@ static inline void tileset_cauldron_animate(double time) {
 	#undef KEYFRAME
 }
 
+
 void tileset_update() {
 	double time = GetTime();
 	tileset_torch_animate(time);

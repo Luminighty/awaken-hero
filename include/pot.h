@@ -11,8 +11,10 @@ typedef struct {
 	ColliderId collider;
 } Pot;
 
+
 Pot pot_create(int x, int y);
 void pot_destroy(Pot* pot);
 void pot_render(Pot* pot);
+
 
 #endif // POT_H

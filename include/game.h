@@ -9,6 +9,7 @@
 
 #define MAX_HERO_HUSKS 4
 
+
 typedef struct {
 	Camera2D camera;
 	Map map;
@@ -17,6 +18,7 @@ typedef struct {
 	size_t network_hero_count;
 } Game;
 
+
 extern Game game;
 
 void game_create();
@@ -24,5 +26,6 @@ void game_destroy();
 void game_update();
 void game_render();
 bool game_is_running();
+
 
 #endif // GAME_H

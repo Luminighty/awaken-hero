@@ -15,6 +15,7 @@
 
 #define LOG_HEADER "MAP"
 
+
 static inline void room_set_tile(Room* room, int x, int y, Tile tile) { 
 	room->tiles[y * ROOM_WIDTH + x] = tile;
 }
@@ -32,6 +33,7 @@ static inline int room_xy_idx(int x, int y) {
 #define FOR_ROOMS(x, y) \
 	for (int y = 0; y < MAP_HEIGHT; y++)\
 	for (int x = 0; x < MAP_WIDTH; x++)
+
 
 static inline Rectangle rect_tile_dest(int x, int y) {
 	return (Rectangle){
@@ -64,6 +66,7 @@ void map_render(Map* map, int room_x, int room_y) {
 	room_render(&map->rooms[room_y][room_x]);
 }
 
+
 void map_objects_render(Map *map) {
 	#define X(_1, _2, ident, _3) \
 	for (int i = 0; i < map->ident ## _c; i++) \
@@ -94,7 +97,7 @@ Tile map_get_tile(Map* map, int x, int y) {
 }
 
 
-void map_set_tile(Map* map, int x, int y, Tile tile, TileFlipFlag tileflags) {
+void map_set_tile(Map* map, int x, int y, Tile tile, TileFlag tileflags) {
 	int room_x = x / ROOM_WIDTH;
 	int tile_x = x % ROOM_WIDTH;
 	int room_y = y / ROOM_HEIGHT;
@@ -118,6 +121,7 @@ void convert_global_to_room_roomtile(Rectangle* position, int x, int y) {
 	position->width = TILE_SIZE;
 	position->height = TILE_SIZE;
 }
+
 
 void map_print_profiler(Map* map) {
 	LOG("Memory used %lu bytes.\n", sizeof(*map));

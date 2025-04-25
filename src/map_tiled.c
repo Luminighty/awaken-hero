@@ -57,9 +57,10 @@ static const TILED_GUID TILED_FLIP_D =  0x20000000;
 static const TILED_GUID TILED_HEXA_ROTATED = 0x10000000;
 static const TILED_GUID TILED_GUID_PART = ~(TILED_FLIP_H | TILED_FLIP_V | TILED_FLIP_D | TILED_HEXA_ROTATED);
 
-static void tile_object_create(Map* map, int x, int y, TileObject object, TileFlipFlag flipflags);
+static void tile_object_create(Map* map, int x, int y, TileObject object, TileFlag flipflags);
 static void read_tilelayer(Map* map, JsonValue* layer, int width);
 static void read_objectgroup(Map* map, JsonValue* layer, int width);
+
 
 Map map_tiled_load(const char *filename) {
 	JsonValue* map_data = json_loadf(filename);
@@ -100,6 +101,7 @@ static JsonValue* find_property_value(JsonValue* properties, char* property) {
 	return NULL;
 }
 
+
 static void object_owl(Map* map, int x, int y, JsonValue* properties) {
 	assert_array_push(map->owls, map->owl_c);
 	Owl owl = owl_create(x, y);
@@ -108,6 +110,7 @@ static void object_owl(Map* map, int x, int y, JsonValue* properties) {
 		strcpy(owl.message, json_as_string(message)->string);
 	map->owls[map->owl_c++] = owl;
 }
+
 
 static void object_chest(Map* map, int x, int y, JsonValue* properties) {
 	static const char* loot_table[] =  {
@@ -130,6 +133,7 @@ static void object_chest(Map* map, int x, int y, JsonValue* properties) {
 
 	map->chests[map->chest_c++] = chest_create(x, y, loot);
 }
+
 
 static void read_objectgroup(Map* map, JsonValue* layer, int width) {
 	JsonValue* data = json_object_get(layer, "objects");
@@ -170,10 +174,13 @@ static void read_tilelayer(Map* map, JsonValue* layer, int width) {
 		if (id == 0)
 			continue;
 		id--;
-		TileFlipFlag flipflags = 
+		// NOTE: We convert the flip_d into rotated by XOR-ing the flip_h flag
+		if (flip_d)
+			flip_h = !flip_h;
+		TileFlag flipflags = 
 			(flip_h ? TILE_FLIP_H : 0) | 
 			(flip_v ? TILE_FLIP_V : 0) | 
-			(flip_d ? TILE_FLIP_D : 0);
+			(flip_d ? TILE_ROTATED : 0);
 
 		Tile tile = TILED_TO_TILE[id];
 		if (tile != TILE_NONE)
@@ -185,7 +192,8 @@ static void read_tilelayer(Map* map, JsonValue* layer, int width) {
 	
 }
 
-static void tile_object_create(Map* map, int x, int y, TileObject object, TileFlipFlag flipflags) {
+
+static void tile_object_create(Map* map, int x, int y, TileObject object, TileFlag flipflags) {
 	switch (object) {
 	case OBJECT_SPAWN:
 		map->spawn_x = x;
@@ -296,10 +304,11 @@ static TileObject TILED_TO_TILEOBJECT[] = {
 
 #define str(s) #s
 
-#define assert_fence(fence)\
-	static_assert(\
+#define assert_fence(fence) \
+static_assert( \
 	OBJECT_ ## fence - OBJECT_FENCE_TL == fence, \
-	"Invalid fence mapping! OBJECT_" #fence " -> " #fence ". ")
+	"Invalid fence mapping! OBJECT_" #fence " -> " #fence ". " \
+)
 assert_fence(FENCE_TL);
 assert_fence(FENCE_TR);
 assert_fence(FENCE_BL);
@@ -311,14 +320,15 @@ assert_fence(FENCE_B);
 #undef assert_fence
 
 
-#define assert_door(door)\
-	static_assert(\
+#define assert_door(door) \
+static_assert( \
 	OBJECT_DOOR_ ## door - OBJECT_DOOR_MONSTER == DOOR_TYPE_ ##  door, \
-	"Invalid door mapping! OBJECT_" #door " -> " #door ". ");
-assert_door(MONSTER)
-assert_door(KEY)
-assert_door(BOSS)
-assert_door(ONEWAY)
-assert_door(ONEWAY_EXIT)
-assert_door(KEYBLOCK)
+	"Invalid door mapping! OBJECT_" #door " -> " #door ". " \
+)
+assert_door(MONSTER);
+assert_door(KEY);
+assert_door(BOSS);
+assert_door(ONEWAY);
+assert_door(ONEWAY_EXIT);
+assert_door(KEYBLOCK);
 #undef assert_fence

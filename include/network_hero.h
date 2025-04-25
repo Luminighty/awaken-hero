@@ -1,7 +1,6 @@
 #ifndef NETWORK_HERO_H
 #define NETWORK_HERO_H
 
-
 #include "entity.h"
 #include "hero.h"
 
@@ -30,5 +29,6 @@ void network_hero_handle_sync(NetworkHero* hero, NetworkHeroState* state);
 void network_hero_handle_action(NetworkHero* hero, float x, float y);
 void network_hero_update(NetworkHero* hero);
 void network_hero_render(NetworkHero* hero);
+
 
 #endif // NETWORK_HERO_H

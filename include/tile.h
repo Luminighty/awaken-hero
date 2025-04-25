@@ -37,10 +37,10 @@ typedef enum {
 
 
 typedef enum {
-	TILE_FLIP_D = 1 << 0,
+	TILE_ROTATED = 1 << 0,
 	TILE_FLIP_V = 1 << 1,
 	TILE_FLIP_H = 1 << 2,
-} TileFlipFlag;
+} TileFlag;
 
 
 extern Rectangle TILE_RECT[];

@@ -1,6 +1,7 @@
 #ifndef DARRAY_H
 #define DARRAY_H
 
+
 #define DATypedef(Type, Item) \
 	typedef struct { \
 		Item *items; \
@@ -18,6 +19,7 @@
 	}\
 	vec.items[vec.count++] = value;\
 	} while (0)
+
 
 #define da_pop(vec) vec.items[--vec.count]
 

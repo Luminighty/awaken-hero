@@ -47,6 +47,7 @@ static inline int message_receive(Message* message) {
 	return n;
 }
 
+
 static inline bool find_network_hero(size_t owner, NetworkHero** hero) {
 	for (size_t i = 0; i < game.network_hero_count; i++) {
 		if (game.network_heroes[i].owner != owner)
@@ -60,6 +61,7 @@ static inline bool find_network_hero(size_t owner, NetworkHero** hero) {
 	return false;
 }
 
+
 static void handle_sync_state(size_t sender, MessageState* state) {
 	NetworkHero* network_hero = NULL;
 	bool found = find_network_hero(sender, &network_hero);
@@ -69,6 +71,7 @@ static void handle_sync_state(size_t sender, MessageState* state) {
 	hero_husk_get_state(&network_hero->husk, &network_hero->previous);
 	network_hero_handle_sync(network_hero, &state->network_hero);
 }
+
 
 static void handle_action(size_t sender, MessageAction* action) {
 	NetworkHero* network_hero = NULL;
@@ -83,12 +86,14 @@ static void handle_action(size_t sender, MessageAction* action) {
 	}
 }
 
+
 static void handle_assign_uid(size_t uid) {
 	LOG("Assigning UID: %zu\n", uid);
 	client.uid = uid;
 	client.status = CLIENT_STATUS_READY;
 	game.hero.husk.animation.palette = (uid - 1) % HERO_PALETTE_SIZE;
 }
+
 
 static void handle_server_message(Message* message) {
 	switch (message->tag) {
@@ -146,12 +151,14 @@ static inline Message message_create_state_sync() {
 	return message;
 }
 
+
 void message_send_action(MessageAction action) {
 	Message message = {.tag = TAG_ACTION};
 	message.data.action = action;
 	message.data.action.owner = client.uid;
 	message_send(message);
 }
+
 
 void network_client_update() {
 	if (client.status == CLIENT_STATUS_DISCONNECTED)

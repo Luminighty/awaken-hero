@@ -13,6 +13,7 @@
 static Rectangle CHEST_SPRITE = TILE(0, 5);
 static Rectangle CHEST_OPENED_SPRITE = TILE(1, 5);
 
+
 Chest chest_create(int x, int y, ChestLoot loot) {
 	Chest chest = {0};
 	chest.loot = loot;

@@ -74,5 +74,4 @@ void hero_update(Hero* hero);
 void hero_husk_update(HeroHusk* hero);
 
 
-
 #endif // HERO_H

@@ -21,7 +21,6 @@ typedef struct {
 } Room;
 
 
-
 // TODO: Consider using a sparse tilemap (size_t[y][x] -> Room)
 // NOTE: Maybe we could count the amount of ENTITY required per map, and alloc for that
 //	Although this is fine for now too.
@@ -32,13 +31,14 @@ typedef struct {
 } Map;
 #undef X
 
+
 Map map_create();
 void map_render(Map* map, int room_x, int room_y);
 void map_objects_render(Map* map);
 Room* map_get_room_from_tile(Map* map, int x, int y);
 Tile map_get_tile(Map* map, int x, int y);
 
-void map_set_tile(Map* map, int x, int y, Tile tile, TileFlipFlag flipflags);
+void map_set_tile(Map* map, int x, int y, Tile tile, TileFlag flipflags);
 Room* map_get_room_at(Map* map, int x, int y);
 
 // NOTE: This function converts a global position to a tile relative to a room

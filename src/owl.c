@@ -11,8 +11,10 @@
 
 #define LOG_HEADER "OWL"
 
+
 #define TILE(x, y) (Rectangle){x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE}
 static Rectangle OWL_SPRITE = TILE(4, 3);
+
 
 Owl owl_create(int x, int y) {
 	Owl owl = {0};
@@ -45,3 +47,4 @@ void owl_render(Owl* owl) {
 void owl_on_interact(Owl* owl) {
 	LOG("%s\n", owl->message);
 }
+

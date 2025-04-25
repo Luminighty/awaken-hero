@@ -15,6 +15,7 @@ typedef struct {
 	struct sockaddr_in address;
 } Server;
 
+
 typedef struct {
 	bool alive;
 	time_t last_active;
@@ -31,5 +32,6 @@ typedef struct {
 
 
 int server_main();
+
 
 #endif // SERVER_H

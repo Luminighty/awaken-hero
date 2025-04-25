@@ -9,6 +9,7 @@
 
 typedef size_t ColliderId;
 
+
 typedef enum {
 	COLLISION_LAYER_PLAYER = 1 << 0,
 	COLLISION_LAYER_SWORD = 1 << 1,

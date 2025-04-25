@@ -8,6 +8,7 @@
 #define TILE(x, y) (Rectangle){x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE}
 static Rectangle POT_SPRITE = TILE(1, 6);
 
+
 Pot pot_create(int x, int y) {
 	Pot pot = {0};
 	pot.id = entity_create_id(ENTITY_POT);

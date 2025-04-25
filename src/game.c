@@ -25,12 +25,14 @@ void game_create() {
 	game.camera.offset.y = SCREEN_HEIGHT / 2.f;
 }
 
+
 void game_destroy() {
 	textures_destroy();
 	network_client_destroy();
 	map_print_profiler(&game.map);
 	CloseWindow();
 }
+
 
 void game_update() {
 	tileset_update();
@@ -44,9 +46,9 @@ void game_update() {
 	game.camera.target.y = game.hero.room_y * TILE_SIZE * ROOM_HEIGHT + TILE_SIZE * ROOM_HEIGHT / 2.f;
 }
 
+
 static const Rectangle RENDER_SOURCE = {.x = 0, .y = 0, .width = SCREEN_WIDTH, .height = -SCREEN_HEIGHT};
 static const Rectangle RENDER_DEST = {.x = 0, .y = 0, .width = WIN_WIDTH, .height = WIN_HEIGHT};
-
 void game_render() {
 	BeginDrawing();
 	BeginTextureMode(textures.render_target);
@@ -68,6 +70,7 @@ void game_render() {
 	DrawTexturePro(textures.render_target.texture, RENDER_SOURCE, RENDER_DEST, (Vector2){0, }, 0, WHITE);
 	EndDrawing();
 }
+
 
 bool game_is_running() {
 	return !WindowShouldClose();

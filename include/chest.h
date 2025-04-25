@@ -21,9 +21,11 @@ typedef struct {
 	ChestLoot loot;
 } Chest;
 
+
 Chest chest_create(int x, int y, ChestLoot loot);
 void chest_destroy(Chest* chest);
 void chest_render(Chest* chest);
 void chest_on_interact(Chest* chest, Hero* hero);
+
 
 #endif // CHEST_H

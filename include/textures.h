@@ -13,9 +13,12 @@ typedef struct {
 	Texture2D tileset;
 } Textures;
 
+
 extern Textures textures;
+
 
 void textures_create();
 void textures_destroy();
+
 
 #endif // TEXTURES_H

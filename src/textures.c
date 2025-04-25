@@ -17,8 +17,10 @@ void textures_create() {
 	textures.tileset = LoadTexture("./assets/tileset.png");
 }
 
+
 void textures_destroy() {
 	UnloadRenderTexture(textures.render_target);
 	UnloadTexture(textures.hero);
 	UnloadTexture(textures.tileset);
 }
+

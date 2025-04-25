@@ -15,6 +15,7 @@
 
 CollisionServer server = {0};
 
+
 ColliderId collider_create(EntityId parent, Rectangle area, CollisionLayer layer) {
 	Collider collider = {
 		.area = area,
@@ -39,6 +40,7 @@ ColliderId collider_create(EntityId parent, Rectangle area, CollisionLayer layer
 	assert(server.colliders.items[id].alive);
 	return id;
 }
+
 
 void collider_destroy(ColliderId id) { server.colliders.items[id].alive = false; }
 void collider_set_enabled(ColliderId id, bool enabled) { server.colliders.items[id].enabled = enabled; }
@@ -78,6 +80,7 @@ void collision_render() {
 
 #define AS_VEC2(area) (Vector2){.x = area.x, .y = area.y}
 
+
 static inline bool rect_intersects(Rectangle left, Rectangle right) {
 	return left.x < right.x + right.width &&
 		left.x + left.width > right.x &&
@@ -85,9 +88,11 @@ static inline bool rect_intersects(Rectangle left, Rectangle right) {
 		left.y + left.height > right.y;
 }
 
+
 static inline bool collides_with(Collider* other, Rectangle area) {
 	return other->enabled && rect_intersects(area, other->area);
 }
+
 
 Vector2 collider_move(ColliderId id, Vector2 delta) {
 	assert(server.colliders.items[id].alive);
@@ -102,7 +107,7 @@ Vector2 collider_move(ColliderId id, Vector2 delta) {
 	if (is_colliding_with_map(new_area))
 		return AS_VEC2(collider->area);
 
-	// TODO: Check with other colliders
+	// TODO: Check for collision masks
 	for (size_t other_id = 0; other_id < server.colliders.count; other_id++)
 		if(id != other_id && collides_with(&server.colliders.items[other_id], new_area))
 			return AS_VEC2(collider->area);
@@ -112,19 +117,23 @@ Vector2 collider_move(ColliderId id, Vector2 delta) {
 	return AS_VEC2(new_area);
 }
 
+
 static inline float solve_line_equation_for_x(float x, float y, float c, float target_y) {
 	assert(fabs(x) > EPSILON);
 	return -(y * target_y + c) / x;
 }
+
 
 static inline float solve_line_equation_for_y(float x, float y, float c, float target_x) {
 	assert(fabs(y) > EPSILON);
 	return -(x * target_x + c) / y;
 }
 
+
 static inline bool is_solution_in_range(float from, float length, float solution) {
 	return from < solution && from + length > solution;
 }
+
 
 /// Returns true if a collider has been found that's closer than min_distance. Also updates result and min_distance based on this
 static inline bool raycast_hit_collider(Collider* collider, float x, float y, float c, Vector2 from, Vector2* result, float* min_distance) {
@@ -178,6 +187,7 @@ static inline bool raycast_hit_collider(Collider* collider, float x, float y, fl
 	}
 	return is_hit_closer;
 }
+
 
 bool collider_raycast_hit(Raycast raycast, CollisionLayer hit_layer, RaycastHitResult* result) {
 	assert(result);

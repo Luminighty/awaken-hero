@@ -22,8 +22,7 @@ static Rectangle DOOR_SPRITE[] = {
 };
 
 
-// TODO: Add door rotations
-Door door_create(int x, int y, DoorType type, TileFlipFlag flipflags) {
+Door door_create(int x, int y, DoorType type, TileFlag flipflags) {
 	Door door = {0};
 	door.type = type;
 	door.flipflags = flipflags;
@@ -41,22 +40,21 @@ void door_destroy(Door* door) {
 }
 
 
-
 void door_render(Door* door) {
 	if (door->is_open)
 		return;
 	static const Vector2 origin = {TILE_SIZE / 2.f, TILE_SIZE / 2.f};
 	Rectangle sprite = DOOR_SPRITE[door->type];
+
 	float rotation = 0.f;
-	TileFlipFlag flags = door->flipflags;
-	if (flags & TILE_FLIP_D) {
-		flags ^= TILE_FLIP_H;
+	TileFlag flags = door->flipflags;
+	if (flags & TILE_ROTATED)
 		rotation = 270.f;
-	}
 	if (flags & TILE_FLIP_H)
 		sprite.width *= -1;
 	if (flags & TILE_FLIP_V)
 		sprite.height *= -1;
+	
 	DrawTexturePro(
 		textures.tileset,
 		DOOR_SPRITE[door->type],
