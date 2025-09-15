@@ -1,0 +1,29 @@
+{
+    "activeFile": "tileset_base.tsx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "debug.json": {
+            "scale": 2,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 259.75,
+                "y": 204
+            }
+        },
+        "tileset_base.tsx": {
+            "scaleInDock": 2,
+            "scaleInEditor": 4
+        }
+    },
+    "openFiles": [
+        "debug.json",
+        "tileset_base.tsx"
+    ],
+    "project": "awaken-hero.tiled-project",
+    "recentFiles": [
+        "debug.json",
+        "tileset_base.tsx"
+    ]
+}

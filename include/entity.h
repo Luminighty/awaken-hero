@@ -12,6 +12,7 @@
 	X(ENTITY_CHEST, Chest, chest, 64) \
 	X(ENTITY_FENCE, Fence, fence, 64) \
 	X(ENTITY_DOOR, Door, door, 64) \
+	X(ENTITY_SWITCH, Switch, switch, 16) \
 
 
 #define X(type, ...) type ,

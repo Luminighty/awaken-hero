@@ -22,6 +22,7 @@ ColliderId collider_create(EntityId parent, Rectangle area, CollisionLayer layer
 		.alive = true,
 		.enabled = true,
 		.layer = layer,
+		.mask = ~0,
 	};
 	collider.parent = parent;
 
@@ -45,6 +46,8 @@ ColliderId collider_create(EntityId parent, Rectangle area, CollisionLayer layer
 void collider_destroy(ColliderId id) { server.colliders.items[id].alive = false; }
 void collider_set_enabled(ColliderId id, bool enabled) { server.colliders.items[id].enabled = enabled; }
 void collider_set_debug(ColliderId id, bool debug) { server.colliders.items[id].debug = debug; }
+void collider_set_area(ColliderId id, Rectangle area) { server.colliders.items[id].area = area; }
+void collider_set_mask(ColliderId id, CollisionLayer mask) { server.colliders.items[id].mask = mask; }
 
 
 static inline bool is_tile_solid(int x, int y) {
@@ -72,7 +75,8 @@ void collision_render() {
 	for (size_t i = 0; i < server.colliders.count; i++) {
 		Collider* c = &server.colliders.items[i];
 		if (c->alive && c->debug) {
-			DrawRectangleLinesEx(c->area, 1.0f, GREEN);
+			Color color = c->enabled ? GREEN : RED;
+			DrawRectangleLinesEx(c->area, 1.0f, color);
 		}
 	}
 
@@ -212,4 +216,3 @@ bool collider_raycast_hit(Raycast raycast, CollisionLayer hit_layer, RaycastHitR
 		result->hit_point = min_distance_point;
 	return found;
 }
-

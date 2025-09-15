@@ -48,6 +48,7 @@ typedef struct {
 	HeroAnimState animation;
 	bool swinging;
 	float swing_tick;
+	ColliderId sword_collider;
 } HeroHusk;
 
 
@@ -63,6 +64,7 @@ typedef struct {
 	ColliderId collider;
 	Inventory inventory;
 	int room_x, room_y;
+	int safe_position_x, safe_position_y;
 } Hero;
 
 

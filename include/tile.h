@@ -45,6 +45,7 @@ typedef enum {
 
 extern Rectangle TILE_RECT[];
 extern bool TILE_SOLID[];
+extern bool TILE_SAFE[];
 void tileset_update();
 
 

@@ -2,6 +2,7 @@
 #include "config.h"
 #include <math.h>
 #include <raylib.h>
+#include <stdbool.h>
 
 #define TILE(_x, _y) ((Rectangle){ .x = _x * TILE_SIZE, .y = _y * TILE_SIZE, .width = TILE_SIZE, .height = TILE_SIZE })
 
@@ -92,3 +93,8 @@ void tileset_update() {
 	tileset_cauldron_animate(time);
 }
 
+bool TILE_SAFE[] = {
+	[TILE_FLOOR_ALT] = true,
+	[TILE_FLOOR_STAIR] = true,
+	[TILE_FLOOR] = true,
+};

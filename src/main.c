@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
 	while(game_is_running()) {
 		game_update();
 		game_render();
+		fflush(stdout);
 	}
 	game_destroy();
 }

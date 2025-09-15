@@ -1,5 +1,6 @@
 #include "network_hero.h"
 #include "client.h"
+#include "collision.h"
 #include "entity.h"
 #include "hero.h"
 #include "log.h"
@@ -31,6 +32,8 @@ void network_hero_init(NetworkHero* hero, NetworkHeroState* state) {
 	hero->husk.animation.palette = state->palette;
 	hero->previous = *state;
 	hero->target = *state;
+	hero->husk.sword_collider = collider_create(hero->id, (Rectangle){0}, COLLISION_LAYER_HUSK_SWORD);
+	collider_set_enabled(hero->husk.sword_collider, true);
 }
 
 
@@ -51,6 +54,7 @@ void network_hero_handle_action(NetworkHero* hero, float x, float y) {
 
 	hero->husk.swinging = true;
 	hero->husk.swing_tick = 0.f;
+	collider_set_enabled(hero->husk.sword_collider, true);
 }
 
 

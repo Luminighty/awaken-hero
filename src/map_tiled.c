@@ -6,6 +6,7 @@
 #include "json.h"
 #include "log.h"
 #include "map.h"
+#include "switch.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -44,6 +45,8 @@ typedef enum {
 	OBJECT_DOOR_ONEWAY,
 	OBJECT_DOOR_ONEWAY_EXIT,
 	OBJECT_DOOR_KEYBLOCK,
+
+	OBJECT_SWITCH,
 } TileObject;
 
 
@@ -235,6 +238,10 @@ static void tile_object_create(Map* map, int x, int y, TileObject object, TileFl
 		map->doors[map->door_c++] = door_create(x * TILE_SIZE, y * TILE_SIZE, type, flipflags);
 		break;
 	}
+	case OBJECT_SWITCH:
+		assert_array_push(map->switchs, map->switch_c);
+		map->switchs[map->switch_c++] = switch_create(x * TILE_SIZE, y * TILE_SIZE);
+		break;
 	default:
 		printf("TileObject %d not implemented yet.\n", object);
 		assert(0);
@@ -300,6 +307,8 @@ static TileObject TILED_TO_TILEOBJECT[] = {
 	[53] = OBJECT_DOOR_ONEWAY,
 	[43] = OBJECT_DOOR_ONEWAY_EXIT,
 	[52] = OBJECT_DOOR_KEYBLOCK,
+
+	[36] = OBJECT_SWITCH,
 };
 
 #define str(s) #s

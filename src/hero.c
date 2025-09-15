@@ -4,10 +4,13 @@
 #include "config.h"
 #include "door.h"
 #include "entity.h"
+#include "game.h"
 #include "log.h"
+#include "map.h"
 #include "textures.h"
 #include "collision.h"
 #include "client.h"
+#include "tile.h"
 #include "utils.h"
 #include "owl.h"
 
@@ -45,6 +48,28 @@ static const Vector2 SWORD_OFFSETS[][3] = {
 	[DIR_RIGHT] = {VEC(0.4, -1), VEC(0.8, -0.7), VEC(1, 0)},
 	[DIR_UP] = {VEC(0.9, -0.4), VEC(0.75, -0.75), VEC(0, -1)},
 };
+static const Rectangle SWORD_AREA[][3] = {
+	[DIR_DOWN] = {
+		((Rectangle){-18.0, 1.0, 20.0, 10.0}),
+		((Rectangle){-16.0, 4.0, 21.0, 21.0}),
+		((Rectangle){3.0, 12.0, 10.0, 20.0}),
+	},
+	[DIR_LEFT] = {
+		((Rectangle){-4.0, -22.0, 10.0, 20.0}),
+		((Rectangle){-18.0,-18.0, 21.0, 21.0}),
+		((Rectangle){-24.0, 0.0, 20.0, 10.0}),
+	},
+	[DIR_RIGHT] = {
+		((Rectangle){2.0, -22.0, 10.0, 22.0}),
+		((Rectangle){6.0,-18.0, 21.0, 21.0}),
+		((Rectangle){14.0, 0.0, 20.0, 10.0}),
+	},
+	[DIR_UP] = {
+		((Rectangle){10.0, -6.0, 20.0, 10.0}),
+		((Rectangle){6.0, -20.0, 21.0, 21.0}),
+		((Rectangle){-4.0, -26.0, 10.0, 20.0}),
+	},
+};
 
 #define RAYCAST(_x, _y, _dx, _dy) (Raycast){ \
 	.origin = (Vector2){.x = _x, .y = _y}, \
@@ -73,7 +98,9 @@ Hero hero_create() {
 		.height = size.y,
 	};
 	hero.collider = collider_create(hero.id, rect, COLLISION_LAYER_PLAYER);
-	hero.husk.animation.palette = HERO_PALETTE_PURPLE;
+	hero.husk.animation.palette = HERO_PALETTE_GREEN;
+	hero.husk.sword_collider = collider_create(hero.id, (Rectangle){0}, COLLISION_LAYER_SWORD);
+	collider_set_debug(hero.husk.sword_collider, true);
 	// collider_set_debug(hero.collider, true);
 	return hero;
 }
@@ -106,6 +133,7 @@ void hero_update(Hero* hero) {
 			.x = hero->husk.position.x,
 			.y = hero->husk.position.y,
 		});
+		collider_set_enabled(hero->husk.sword_collider, true);
 	}
 
 	if (IsKeyPressed(INPUT_USE))
@@ -142,6 +170,16 @@ static Vector2 hero_walk(Hero* hero, float dt) {
 	hero->husk.position.y = new_position.y;
 	hero->room_x = (ROOM_OFFSET.x + new_position.x) / TILE_SIZE / ROOM_WIDTH;
 	hero->room_y = (ROOM_OFFSET.y + new_position.y) / TILE_SIZE / ROOM_HEIGHT;
+
+	int tile_x = new_position.x / TILE_SIZE;
+	int tile_y = new_position.y / TILE_SIZE;
+	Tile current_tile = map_get_tile(&game.map, tile_x, tile_y);
+	if (TILE_SAFE[current_tile]) {
+		hero->safe_position_x = tile_x;
+		hero->safe_position_y = tile_y;
+	}
+
+	printf("Tile@(%d, %d)\n", hero->safe_position_x, hero->safe_position_y);
 //	game.camera.target.x = hero->room_x * ROOM_WIDTH * TILE_SIZE;
 //	game.camera.target.y = hero->room_y * ROOM_HEIGHT * TILE_SIZE;
 	if (input.x != 0 || input.y != 0)
@@ -172,7 +210,7 @@ static void handle_touch_use(Hero* hero) {
 		door_on_interact(entity_lookup(result.parent), hero);
 		return;
 	default:
-		LOG("Tried to touch use '%s'\n", ENTITY_TYPE_TO_STR[result.parent.type]);
+		LOG("Tried to touch '%s'\n", ENTITY_TYPE_TO_STR[result.parent.type]);
 		return;
 	}
 }
@@ -199,12 +237,31 @@ static void handle_use(Hero* hero) {
 }
 
 
+static inline int swing_frame(HeroHusk* hero) {
+	int frame = (hero->swing_tick / SWING_DELAY) * 4;
+	if (frame == 3)
+		frame = 2;
+	return frame;
+}
+
 void hero_husk_update(HeroHusk *hero) {
 	assert(hero);
 	float dt = GetFrameTime();
 	if (hero->swinging) {
 		hero->swing_tick += dt;
 		hero->swinging = hero->swing_tick < SWING_DELAY;
+		if (hero->swinging) {
+			int frame = swing_frame(hero);
+			Rectangle sword_area = {
+				.x = hero->position.x + SWORD_AREA[hero->facing][frame].x,
+				.y = hero->position.y + SWORD_AREA[hero->facing][frame].y,
+				SWORD_AREA[hero->facing][frame].width,
+				SWORD_AREA[hero->facing][frame].height,
+			};
+			collider_set_area(hero->sword_collider, sword_area);
+		} else {
+			collider_set_enabled(hero->sword_collider, false);
+		}
 	}
 	hero_update_animation(hero, dt);
 }
@@ -305,13 +362,10 @@ static Rectangle hero_sprite(HeroHusk* hero) {
 	}
 }
 
-
 static inline void sword_render(HeroHusk* hero) {
 	if (!hero->swinging)
 		return;
-	int frame = (hero->swing_tick / SWING_DELAY) * 4;
-	if (frame == 3)
-		frame = 2;
+	int frame = swing_frame(hero);
 
 	Rectangle sprite = SWORD_SPRITES[hero->facing][frame];
 	Vector2 offset = SWORD_OFFSETS[hero->facing][frame];

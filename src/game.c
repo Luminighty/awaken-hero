@@ -14,6 +14,7 @@ Game game = {0};
 void game_create() {
 	InitWindow(WIN_WIDTH, WIN_HEIGHT, TITLE);
 	HideCursor();
+	SetTargetFPS(60);
 	textures_create();
 	network_client_create();
 	game.map = map_create();

@@ -8,6 +8,7 @@
 #include "fence.h"
 #include "owl.h"
 #include "pot.h"
+#include "switch.h"
 #include "tile.h"
 #include <raylib.h>
 
