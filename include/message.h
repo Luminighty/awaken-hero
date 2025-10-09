@@ -17,6 +17,8 @@ typedef enum {
 
 typedef enum {
 	ACTION_SWING,
+	ACTION_FALL,
+	ACTION_SET_POSITION,
 } Action;
 
 

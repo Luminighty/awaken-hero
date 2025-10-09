@@ -2,11 +2,9 @@
 
 #include "config.h"
 #include "entity.h"
-#include "fence.h"
 #include "log.h"
 #include "map_tiled.h"
-#include "pot.h"
-#include "door.h"
+#include "switch_block.h"
 #include "textures.h"
 #include "tile.h"
 
@@ -75,6 +73,15 @@ void map_objects_render(Map *map) {
 	#undef X
 }
 
+void map_objects_update(Map *map) {
+	#define update_entity(ident) \
+		for (int i = 0; i < map->ident ## _c; i++) \
+			ident ## _update(&map->ident ## s[i]);
+
+	update_entity(switch);
+
+	#undef update_entity
+}
 
 Map map_create() {
 	return map_tiled_load("assets/maps/debug.json");
@@ -112,6 +119,18 @@ Room* map_get_room_at(Map* map, int x, int y) {
 	int room_x = x / ROOM_WIDTH;
 	int room_y = y / ROOM_HEIGHT;
 	return &map->rooms[room_y][room_x];
+}
+
+void map_switch_toggle_start(Map* map) {
+	map->is_switch_toggling = true;
+	for (int i = 0; i < map->switch_block_c; i++)
+		switch_block_toggle_start(&map->switch_blocks[i]);
+}
+
+void map_switch_toggle_finish(Map* map) {
+	for (int i = 0; i < map->switch_block_c; i++)
+		switch_block_toggle_finish(&map->switch_blocks[i]);
+	map->is_switch_toggling = false;
 }
 
 

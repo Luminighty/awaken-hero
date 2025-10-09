@@ -78,11 +78,17 @@ static void handle_action(size_t sender, MessageAction* action) {
 	find_network_hero(sender, &network_hero);
 	assert(network_hero != NULL);
 	switch (action->action) {
+	case ACTION_SET_POSITION:
+		network_hero_handle_set_position(network_hero, action->x, action->y);
+		break;
+	case ACTION_FALL:
+		network_hero_handle_fall(network_hero, action->x, action->y);
+		break;
 	case ACTION_SWING:
-		network_hero_handle_action(network_hero, action->x, action->y);
-			break;
-		default:
-			assert(0);
+		network_hero_handle_swing(network_hero, action->x, action->y);
+		break;
+	default:
+		assert(0);
 	}
 }
 

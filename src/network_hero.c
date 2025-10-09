@@ -33,6 +33,7 @@ void network_hero_init(NetworkHero* hero, NetworkHeroState* state) {
 	hero->previous = *state;
 	hero->target = *state;
 	hero->husk.sword_collider = collider_create(hero->id, (Rectangle){0}, COLLISION_LAYER_HUSK_SWORD);
+	collider_set_mask(hero->husk.sword_collider, 0);
 	collider_set_enabled(hero->husk.sword_collider, true);
 }
 
@@ -45,12 +46,28 @@ void network_hero_handle_sync(NetworkHero* hero, NetworkHeroState* state) {
 	hero->husk.facing = state->facing;
 }
 
-void network_hero_handle_action(NetworkHero* hero, float x, float y) {
-	LOG("Hero %zu action received.\n", hero->owner);
+static inline void force_position(NetworkHero* hero, float x, float y) {
+	hero->previous.position.x = x;
+	hero->previous.position.y = y;
 	hero->target.position.x = x;
 	hero->target.position.y = y;
 	hero->husk.position.x = x;
 	hero->husk.position.y = y;
+}
+
+void network_hero_handle_set_position(NetworkHero* hero, float x, float y) {
+	force_position(hero, x, y);
+}
+
+void network_hero_handle_fall(NetworkHero* hero, float x, float y) {
+	force_position(hero, x, y);
+	hero->husk.falling = true;
+	hero->husk.fall_tick = 0.f;
+}
+
+void network_hero_handle_swing(NetworkHero* hero, float x, float y) {
+	LOG("Hero %zu action received.\n", hero->owner);
+	force_position(hero, x, y);
 
 	hero->husk.swinging = true;
 	hero->husk.swing_tick = 0.f;
@@ -86,6 +103,6 @@ void network_hero_update(NetworkHero* hero) {
 
 
 void network_hero_render(NetworkHero* hero) {
-	hero_render(&hero->husk);
+	hero_husk_render(&hero->husk);
 }
 

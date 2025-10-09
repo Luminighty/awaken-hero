@@ -9,6 +9,7 @@
 #include "owl.h"
 #include "pot.h"
 #include "switch.h"
+#include "switch_block.h"
 #include "tile.h"
 #include <raylib.h>
 
@@ -29,6 +30,7 @@ typedef struct {
 	Room rooms[MAP_HEIGHT][MAP_WIDTH];
 	MAP_ENTITY_TYPES
 	int spawn_x, spawn_y;
+	bool is_switch_toggling;
 } Map;
 #undef X
 
@@ -36,6 +38,7 @@ typedef struct {
 Map map_create();
 void map_render(Map* map, int room_x, int room_y);
 void map_objects_render(Map* map);
+void map_objects_update(Map* map);
 Room* map_get_room_from_tile(Map* map, int x, int y);
 Tile map_get_tile(Map* map, int x, int y);
 
@@ -47,5 +50,7 @@ Room* map_get_room_at(Map* map, int x, int y);
 void convert_global_to_room_roomtile(Rectangle* position, int x, int y);
 void map_print_profiler(Map* map);
 
+void map_switch_toggle_start(Map* map);
+void map_switch_toggle_finish(Map* map);
 
 #endif // MAP_H

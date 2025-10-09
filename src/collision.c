@@ -13,7 +13,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-CollisionServer server = {0};
+CollisionServer server = {
+	.colliders = {.count = 1}
+};
 
 
 ColliderId collider_create(EntityId parent, Rectangle area, CollisionLayer layer) {
@@ -28,7 +30,7 @@ ColliderId collider_create(EntityId parent, Rectangle area, CollisionLayer layer
 
 	bool found_slot = false;
 	ColliderId id;
-	for (size_t i = 0; i < server.colliders.count && !found_slot; i++)
+	for (size_t i = 1; i < server.colliders.count && !found_slot; i++)
 		if (!server.colliders.items[i].alive) {
 			found_slot = true;
 			id = i;
@@ -47,6 +49,10 @@ void collider_destroy(ColliderId id) { server.colliders.items[id].alive = false;
 void collider_set_enabled(ColliderId id, bool enabled) { server.colliders.items[id].enabled = enabled; }
 void collider_set_debug(ColliderId id, bool debug) { server.colliders.items[id].debug = debug; }
 void collider_set_area(ColliderId id, Rectangle area) { server.colliders.items[id].area = area; }
+void collider_set_position(ColliderId id, Vector2 pos) { 
+	server.colliders.items[id].area.x = pos.x; 
+	server.colliders.items[id].area.y = pos.y; 
+}
 void collider_set_mask(ColliderId id, CollisionLayer mask) { server.colliders.items[id].mask = mask; }
 
 
@@ -112,9 +118,15 @@ Vector2 collider_move(ColliderId id, Vector2 delta) {
 		return AS_VEC2(collider->area);
 
 	// TODO: Check for collision masks
-	for (size_t other_id = 0; other_id < server.colliders.count; other_id++)
-		if(id != other_id && collides_with(&server.colliders.items[other_id], new_area))
-			return AS_VEC2(collider->area);
+	for (size_t other_id = 0; other_id < server.colliders.count; other_id++) {
+		if (!(server.colliders.items[other_id].layer & collider->mask))
+			continue;
+		if(id == other_id)
+			continue;
+		if(!collides_with(&server.colliders.items[other_id], new_area))
+			continue;
+		return AS_VEC2(collider->area);
+	}
 
 	server.colliders.items[id].area.x = new_area.x;
 	server.colliders.items[id].area.y = new_area.y;
@@ -215,4 +227,20 @@ bool collider_raycast_hit(Raycast raycast, CollisionLayer hit_layer, RaycastHitR
 	if (found)
 		result->hit_point = min_distance_point;
 	return found;
+}
+
+
+void collider_query_hit(ColliderId id, ColliderQueryCallback callback, void* callback_data) {
+	assert(server.colliders.items[id].alive);
+	Collider* collider = &server.colliders.items[id];
+
+	for (size_t other_id = 0; other_id < server.colliders.count; other_id++) {
+		if (!(server.colliders.items[other_id].layer & collider->mask))
+			continue;
+		if (id == other_id)
+			continue;
+		if (!collides_with(&server.colliders.items[other_id], collider->area))
+			continue;
+		callback(server.colliders.items[other_id].parent, other_id, callback_data);
+	}
 }

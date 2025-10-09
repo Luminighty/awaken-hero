@@ -43,6 +43,8 @@ void game_update() {
 	for (size_t i = 0; i < game.network_hero_count; i++)
 		network_hero_update(&game.network_heroes[i]);
 
+	map_objects_update(&game.map);
+
 	game.camera.target.x = game.hero.room_x * TILE_SIZE * ROOM_WIDTH + TILE_SIZE * ROOM_WIDTH / 2.f;
 	game.camera.target.y = game.hero.room_y * TILE_SIZE * ROOM_HEIGHT + TILE_SIZE * ROOM_HEIGHT / 2.f;
 }
@@ -63,7 +65,7 @@ void game_render() {
 	for (size_t i = 0; i < game.network_hero_count; i++)
 		network_hero_render(&game.network_heroes[i]);
 
-	hero_render(&game.hero.husk);
+	hero_render(&game.hero);
 	collision_render();
 	EndMode2D();
 	

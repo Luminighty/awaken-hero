@@ -19,6 +19,7 @@ typedef enum {
 	HERO_STATE_IDLE,
 	HERO_STATE_WALK,
 	HERO_STATE_SWING,
+	HERO_STATE_FALLING,
 } HeroState;
 
 
@@ -49,6 +50,8 @@ typedef struct {
 	bool swinging;
 	float swing_tick;
 	ColliderId sword_collider;
+	bool falling;
+	float fall_tick;
 } HeroHusk;
 
 
@@ -65,13 +68,16 @@ typedef struct {
 	Inventory inventory;
 	int room_x, room_y;
 	int safe_position_x, safe_position_y;
+	bool is_safe_position;
+	bool falling;
 } Hero;
 
 
 extern const float HERO_SPEED;
 
 Hero hero_create();
-void hero_render(HeroHusk* hero);
+void hero_husk_render(HeroHusk* hero);
+void hero_render(Hero* hero);
 void hero_update(Hero* hero);
 void hero_husk_update(HeroHusk* hero);
 

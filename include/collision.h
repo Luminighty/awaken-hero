@@ -18,7 +18,7 @@ typedef enum {
 	COLLISION_LAYER_CHEST = 1 << 4,
 	COLLISION_LAYER_POT = 1 << 5,
 	COLLISION_LAYER_OWL = 1 << 6,
-	COLLISION_LAYER_FENCE = 1 << 7,
+	COLLISION_LAYER_WALL = 1 << 7,
 	COLLISION_LAYER_DOOR = 1 << 8,
 	COLLISION_LAYER_SWITCH = 1 << 9,
 } CollisionLayer;
@@ -61,13 +61,20 @@ ColliderId collider_create(EntityId parent, Rectangle area, CollisionLayer layer
 void collider_destroy(ColliderId id);
 
 Vector2 collider_move(ColliderId id, Vector2 delta);
+
 void collider_set_enabled(ColliderId id, bool enabled);
 void collider_set_debug(ColliderId id, bool debug);
 void collider_set_parent(ColliderId id, EntityType parent_type, void* parent);
 void collider_set_area(ColliderId id, Rectangle area);
+void collider_set_position(ColliderId id, Vector2 pos);
 void collider_set_mask(ColliderId id, CollisionLayer mask);
 
 bool collider_raycast_hit(Raycast raycast, CollisionLayer hit_layer, RaycastHitResult* result);
+
+
+
+typedef void (*ColliderQueryCallback)(EntityId entity, ColliderId other, void* data);
+void collider_query_hit(ColliderId id, ColliderQueryCallback callback, void* callback_data);
 
 
 #endif // COLLISION_H

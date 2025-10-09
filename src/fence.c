@@ -39,7 +39,7 @@ Fence fence_create(FenceType type, int x, int y) {
 	Rectangle rect = FENCE_RECT[type];
 	rect.x += x;
 	rect.y += y;
-	fence.collider = collider_create(fence.id, rect, COLLISION_LAYER_FENCE);
+	fence.collider = collider_create(fence.id, rect, COLLISION_LAYER_WALL);
 	// collider_set_debug(fence.collider, true);
 
 	rect.width = TILE_SIZE;

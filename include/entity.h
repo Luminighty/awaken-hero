@@ -13,6 +13,7 @@
 	X(ENTITY_FENCE, Fence, fence, 64) \
 	X(ENTITY_DOOR, Door, door, 64) \
 	X(ENTITY_SWITCH, Switch, switch, 16) \
+	X(ENTITY_SWITCH_BLOCK, SwitchBlock, switch_block, 64) \
 
 
 #define X(type, ...) type ,

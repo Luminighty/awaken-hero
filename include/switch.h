@@ -9,12 +9,15 @@ typedef struct {
 	EntityId id;
 	Rectangle position;
 	ColliderId collider;
+	float invulnerability;
 } Switch;
 
 
 Switch switch_create(int x, int y);
 void switch_destroy(Switch* _switch);
 void switch_render(Switch* _switch);
+void switch_update(Switch* _switch);
+void switch_on_hit(Switch* _switch, float invulnerability);
 
 
 #endif // SWITCH_H

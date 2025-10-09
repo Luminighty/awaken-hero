@@ -61,6 +61,7 @@ static Client* find_or_insert_client(ServerState* state, Client* clients, size_t
 	Message message_init = {0};
 	message_init.tag = TAG_ASSIGN_UID;
 	message_init.data.uid = clients[free_slot].uid;
+	printf("New client joined!\n");
 	printf("Sending uid: tag: %d uid: %zu len: %lu\n", message_init.tag, message_init.data.uid, sizeof(message_init));
 	sendto(
 		state->server.socketfd,

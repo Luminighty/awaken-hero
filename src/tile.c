@@ -53,6 +53,28 @@ bool TILE_SOLID[] = {
 	[TILE_CAULDRON] = true,
 };
 
+bool tile_is_safe(Tile tile) {
+	switch (tile) {
+	case TILE_FLOOR_ALT:
+	case TILE_FLOOR_STAIR:
+	case TILE_FLOOR:
+		return true;
+	default:
+		return false;
+	}
+};
+bool tile_is_hole(Tile tile) {
+	switch (tile) {
+	case TILE_HOLE:
+	case TILE_HOLE_B:
+	case TILE_HOLE_T:
+	case TILE_HOLE_TB:
+		return true;
+	default:
+		return false;
+	}
+};
+
 // NOTE: Funny X macro usage here:
 #define KEYFRAME_BASE(TIME, SPRITE) if (frame < TIME) { KEYFRAME(SPRITE) }
 #define KEYFRAMES_BOBBING(low, transition, high) \
@@ -92,9 +114,3 @@ void tileset_update() {
 	tileset_torch_animate(time);
 	tileset_cauldron_animate(time);
 }
-
-bool TILE_SAFE[] = {
-	[TILE_FLOOR_ALT] = true,
-	[TILE_FLOOR_STAIR] = true,
-	[TILE_FLOOR] = true,
-};
