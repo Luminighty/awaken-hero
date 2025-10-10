@@ -53,7 +53,7 @@ bool TILE_SOLID[] = {
 	[TILE_CAULDRON] = true,
 };
 
-bool tile_is_safe(Tile tile) {
+inline bool tile_is_safe(Tile tile) {
 	switch (tile) {
 	case TILE_FLOOR_ALT:
 	case TILE_FLOOR_STAIR:
@@ -63,7 +63,7 @@ bool tile_is_safe(Tile tile) {
 		return false;
 	}
 };
-bool tile_is_hole(Tile tile) {
+inline bool tile_is_hole(Tile tile) {
 	switch (tile) {
 	case TILE_HOLE:
 	case TILE_HOLE_B:
