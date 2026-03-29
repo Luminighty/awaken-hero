@@ -1,5 +1,6 @@
 #include "switch.h"
 
+#include "audio.h"
 #include "collision.h"
 #include "config.h"
 #include "entity.h"
@@ -53,5 +54,6 @@ void switch_on_hit(Switch* _switch, float invulnerability) {
 	if (_switch->invulnerability > 0)
 		return;
 	_switch->invulnerability = invulnerability + INVULNERABILITY_PADDING_DELAY;
+	sound_play(SOUND_ENEMY_HIT);
 	map_switch_toggle_start(&game.map);
 }

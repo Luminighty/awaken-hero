@@ -1,5 +1,6 @@
 #include "chest.h"
 
+#include "audio.h"
 #include "collision.h"
 #include "config.h"
 #include "entity.h"
@@ -49,6 +50,7 @@ void chest_on_interact(Chest* chest, Hero* hero) {
 		return;
 	}
 	chest->is_opened = true;
+	sound_play(SOUND_OPEN);
 	switch (chest->loot) {
 	case CHEST_LOOT_NOTHING:
 		LOG("Opened nothing.\n");

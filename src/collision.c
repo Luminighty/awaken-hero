@@ -78,7 +78,7 @@ static inline bool is_colliding_with_map(Rectangle area) {
 
 
 void collision_render() {
-	for (size_t i = 0; i < server.colliders.count; i++) {
+	for (size_t i = 1; i < server.colliders.count; i++) {
 		Collider* c = &server.colliders.items[i];
 		if (c->alive && c->debug) {
 			Color color = c->enabled ? GREEN : RED;
@@ -117,8 +117,7 @@ Vector2 collider_move(ColliderId id, Vector2 delta) {
 	if (is_colliding_with_map(new_area))
 		return AS_VEC2(collider->area);
 
-	// TODO: Check for collision masks
-	for (size_t other_id = 0; other_id < server.colliders.count; other_id++) {
+	for (size_t other_id = 1; other_id < server.colliders.count; other_id++) {
 		if (!(server.colliders.items[other_id].layer & collider->mask))
 			continue;
 		if(id == other_id)
@@ -215,7 +214,7 @@ bool collider_raycast_hit(Raycast raycast, CollisionLayer hit_layer, RaycastHitR
 	float min_distance = Vector2DistanceSqr(from, to);
 	bool found;
 	Vector2 min_distance_point;
-	for (size_t id = 0; id < server.colliders.count; id++) {
+	for (size_t id = 1; id < server.colliders.count; id++) {
 		if (!(server.colliders.items[id].layer & hit_layer))
 			continue;
 		if (raycast_hit_collider(&server.colliders.items[id], x, y, c, from, &min_distance_point, &min_distance)) {
@@ -234,7 +233,7 @@ void collider_query_hit(ColliderId id, ColliderQueryCallback callback, void* cal
 	assert(server.colliders.items[id].alive);
 	Collider* collider = &server.colliders.items[id];
 
-	for (size_t other_id = 0; other_id < server.colliders.count; other_id++) {
+	for (size_t other_id = 1; other_id < server.colliders.count; other_id++) {
 		if (!(server.colliders.items[other_id].layer & collider->mask))
 			continue;
 		if (id == other_id)

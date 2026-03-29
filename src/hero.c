@@ -1,5 +1,6 @@
 #include "hero.h"
 
+#include "audio.h"
 #include "chest.h"
 #include "config.h"
 #include "door.h"
@@ -136,6 +137,7 @@ void hero_update(Hero* hero) {
 	if (hero_can_swing(hero) && IsKeyPressed(INPUT_SWING)) {
 		hero->husk.swinging = true;
 		hero->husk.swing_tick = 0.f;
+		sound_play(SOUND_SWORD);
 		message_send_action((MessageAction){
 			.action = ACTION_SWING, 
 			.x = hero->husk.position.x,
@@ -176,6 +178,7 @@ static void hero_fall(Hero* hero, int tile_x, int tile_y) {
 	hero->falling = true;
 	hero->husk.position.x = tile_x * TILE_SIZE + (size.x / 2.f);
 	hero->husk.position.y = tile_y * TILE_SIZE + (size.y / 2.f);
+	sound_play(SOUND_FALL);
 	collider_set_position(
 		hero->collider, 
 		(Vector2){.x=hero->husk.position.x, .y=hero->husk.position.y}
@@ -206,7 +209,6 @@ static void hole_slipping(Hero* hero, Vector2* velocity, int tile_x, int tile_y)
 	);
 	if (tl && br)
 		hero_fall(hero, tile_x, tile_y);
-
 
 	Vector2 delta = {
 		.x = tile_x * TILE_SIZE + size.x / 2,
@@ -299,7 +301,7 @@ static void handle_touch_use(Hero* hero) {
 		door_on_interact(entity_lookup(result.parent), hero);
 		return;
 	default:
-		LOG("Tried to touch '%s'\n", ENTITY_TYPE_TO_STR[result.parent.type]);
+		LOG("Tried to touch '%s' %zu\n", ENTITY_TYPE_TO_STR[result.parent.type], result.collider);
 		return;
 	}
 }

@@ -4,6 +4,7 @@
 
 #include <raylib.h>
 
+#define array_len(array) sizeof(array) / sizeof(*array)
 #define assert_array_push(array, count) assert(sizeof(array) / sizeof((array)[0]) > (size_t)(count))
 
 void draw_point(int x, int y, Color color);

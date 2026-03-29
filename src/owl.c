@@ -1,5 +1,6 @@
 #include "owl.h"
 
+#include "audio.h"
 #include "collision.h"
 #include "config.h"
 #include "entity.h"
@@ -45,6 +46,7 @@ void owl_render(Owl* owl) {
 
 
 void owl_on_interact(Owl* owl) {
+	sound_play(SOUND_OWL);
 	LOG("%s\n", owl->message);
 }
 

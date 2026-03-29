@@ -1,5 +1,6 @@
 #include "door.h"
 
+#include "audio.h"
 #include "collision.h"
 #include "config.h"
 #include "entity.h"
@@ -80,11 +81,13 @@ void door_on_interact(Door* door, Hero* hero) {
 		if (hero->inventory.keys == 0)
 			return;
 		hero->inventory.keys--;
+		sound_play(SOUND_OPEN);
 		door_set_open(door, true);
 		break;
 	case DOOR_TYPE_BOSS:
 		if (!hero->inventory.boss_key)
 			return;
+		sound_play(SOUND_OPEN);
 		door_set_open(door, true);
 		break;
 	case DOOR_TYPE_ONEWAY:

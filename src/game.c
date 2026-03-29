@@ -1,4 +1,5 @@
 #include "game.h"
+#include "audio.h"
 #include "client.h"
 #include "collision.h"
 #include "config.h"
@@ -13,9 +14,11 @@ Game game = {0};
 
 void game_create() {
 	InitWindow(WIN_WIDTH, WIN_HEIGHT, TITLE);
+	InitAudioDevice();
 	HideCursor();
 	SetTargetFPS(60);
 	textures_create();
+	audios_create();
 	network_client_create();
 	game.map = map_create();
 	game.hero = hero_create();
@@ -24,13 +27,18 @@ void game_create() {
 	game.camera.rotation = 0.0f;
 	game.camera.offset.x = SCREEN_WIDTH / 2.f;
 	game.camera.offset.y = SCREEN_HEIGHT / 2.f;
+
+	PlayMusicStream(audios.level_01);
+	SetMusicVolume(audios.level_01, 0.8f);
 }
 
 
 void game_destroy() {
 	textures_destroy();
+	audios_destroy();
 	network_client_destroy();
 	map_print_profiler(&game.map);
+	CloseAudioDevice();
 	CloseWindow();
 }
 
@@ -53,6 +61,8 @@ void game_update() {
 static const Rectangle RENDER_SOURCE = {.x = 0, .y = 0, .width = SCREEN_WIDTH, .height = -SCREEN_HEIGHT};
 static const Rectangle RENDER_DEST = {.x = 0, .y = 0, .width = WIN_WIDTH, .height = WIN_HEIGHT};
 void game_render() {
+	UpdateMusicStream(audios.level_01);
+
 	BeginDrawing();
 	BeginTextureMode(textures.render_target);
 

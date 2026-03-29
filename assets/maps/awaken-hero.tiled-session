@@ -1,5 +1,5 @@
 {
-    "activeFile": "tileset_base.tsx",
+    "activeFile": "debug.json",
     "expandedProjectPaths": [
         "."
     ],
@@ -9,7 +9,7 @@
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 259.75,
-                "y": 204
+                "y": 176
             }
         },
         "tileset_base.tsx": {
@@ -23,7 +23,7 @@
     ],
     "project": "awaken-hero.tiled-project",
     "recentFiles": [
-        "debug.json",
-        "tileset_base.tsx"
+        "tileset_base.tsx",
+        "debug.json"
     ]
 }
