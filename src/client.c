@@ -4,7 +4,9 @@
 #include "log.h"
 #include "network_hero.h"
 
+#include <asm-generic/errno.h>
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <raylib.h>
 #include <stdio.h>
@@ -21,7 +23,7 @@
 Client client = {0};
 
 const double NETWORK_SYNC_DELAY = 0.1;
-static const int MAX_MESSSAGES = 20;
+static const int MAX_MESSSAGES = 30;
 
 static inline void message_send(Message message) {
 	fflush(stdout);
@@ -37,13 +39,17 @@ static inline void message_send(Message message) {
 
 
 static inline int message_receive(Message* message) {
-	socklen_t len;
+	socklen_t len = sizeof(client.servaddr);
 	int n = recvfrom(
-		client.socketfd, 
+		client.socketfd,
 		message, sizeof(*message),
 		0,
 		(struct sockaddr *)&client.servaddr, &len
 	);
+	if (errno == EWOULDBLOCK)
+		return 0;
+	if (n < 0)
+		perror("Failed to receive message");
 	return n;
 }
 
@@ -94,7 +100,7 @@ static void handle_action(size_t sender, MessageAction* action) {
 
 
 static void handle_assign_uid(size_t uid) {
-	LOG("Assigning UID: %zu\n", uid);
+	LOG("Assigning UID for SELF: %zu\n", uid);
 	client.uid = uid;
 	client.status = CLIENT_STATUS_READY;
 	game.hero.husk.animation.palette = (uid - 1) % HERO_PALETTE_SIZE;
@@ -126,7 +132,8 @@ static void handle_server_message(Message* message) {
 
 
 void network_client_create() {
-	if ( (client.socketfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+	client.socketfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (client.socketfd < 0 ) {
 		perror("socket creation failed.");
 		exit(EXIT_FAILURE);
 	}
@@ -137,9 +144,9 @@ void network_client_create() {
 
 	fcntl(client.socketfd, F_SETFL, O_NONBLOCK);
 
-	client.status = CLIENT_STATUS_CONNECTED;
 	message_send((Message){.tag = TAG_CONNECT });
-	LOG("Client connected...\n");
+	LOG("Client initialized, attempting to connect...\n");
+	client.status = CLIENT_STATUS_CONNECTED;
 }
 
 
@@ -174,10 +181,12 @@ void network_client_update() {
 	int message_c = 0;
 	while (MAX_MESSSAGES > message_c++) {
 		n = message_receive(&message);
+		// LOG("Handling Message %d", n);
 		if (n <= 0)
 			break;
 		handle_server_message(&message);
 	}
+
 	if (client.status != CLIENT_STATUS_READY)
 		return;
 

@@ -21,6 +21,7 @@ SwitchBlock switch_block_create(int x, int y, bool enabled) {
 	// collider_set_debug(switch_block.collider, true);
 	switch_block.position = rect;
 	switch_block.enabled = enabled;
+	collider_set_enabled(switch_block.collider, enabled);
 	return switch_block;
 }
 
@@ -44,6 +45,7 @@ void switch_block_render(SwitchBlock* switch_block) {
 	);
 }
 
+
 void switch_block_toggle_start(SwitchBlock* switch_block) {
 	collider_set_enabled(switch_block->collider, true);
 }
@@ -53,3 +55,4 @@ void switch_block_toggle_finish(SwitchBlock* switch_block) {
 	switch_block->enabled = !switch_block->enabled;
 	collider_set_enabled(switch_block->collider, switch_block->enabled);
 }
+

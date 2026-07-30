@@ -14,6 +14,7 @@ Textures textures = {0};
 	X(textures.hero_palettes[HERO_PALETTE_BLUE], "./assets/link_blue.png")\
 	X(textures.hero_palettes[HERO_PALETTE_PURPLE], "./assets/link_purple.png")\
 	X(textures.tileset, "./assets/tileset.png")\
+	X(textures.enemies, "./assets/enemies.png")\
 
 
 void textures_create() {

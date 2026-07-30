@@ -3,6 +3,7 @@
 #include "chest.h"
 #include "config.h"
 #include "door.h"
+#include "enemy.h"
 #include "json.h"
 #include "log.h"
 #include "map.h"
@@ -80,7 +81,9 @@ Map map_tiled_load(const char *filename) {
 	int layer_count = json_array_length(layers);
 	for (int i = 0; i < layer_count; i++) {
 		JsonValue* layer = json_array_get(layers, i);
-		JsonString* type = json_as_string(json_object_get(layer, "type"));
+		JsonValue* type_value = json_object_get(layer, "type");
+		assert(JSON_IS_STRING(type_value));
+		JsonString* type = json_as_string(type_value);
 
 		if (strcmp(type->string, "tilelayer") == 0)
 			read_tilelayer(&map, layer, width);
@@ -118,6 +121,12 @@ static void object_owl(Map* map, int x, int y, JsonValue* properties) {
 }
 
 
+static void object_enemy(Map* map, int x, int y, JsonValue* properties, EnemyKind kind) {
+	assert_array_push(map->enemys, map->enemy_c);
+	map->enemys[map->enemy_c++] = enemy_create(kind, x, y);
+}
+
+
 static void object_chest(Map* map, int x, int y, JsonValue* properties) {
 	static const char* loot_table[] =  {
 		[CHEST_LOOT_NOTHING] = "NOTHING",
@@ -142,6 +151,7 @@ static void object_chest(Map* map, int x, int y, JsonValue* properties) {
 
 
 static void read_objectgroup(Map* map, JsonValue* layer, int width) {
+	UNUSED(width);
 	JsonValue* data = json_object_get(layer, "objects");
 	int data_length = json_array_length(data);
 	for (int i = 0; i < data_length; i++) {
@@ -152,11 +162,13 @@ static void read_objectgroup(Map* map, JsonValue* layer, int width) {
 		long double y = json_as_number(json_object_get(object, "y")) - TILE_SIZE;
 		JsonValue* properties = json_object_get(object, "properties");
 
-		Room* room = map_get_room_at(map, x / TILE_SIZE, y / TILE_SIZE);
+		// Room* room = map_get_room_at(map, x / TILE_SIZE, y / TILE_SIZE);
 		if (strcmp(template->string, "owl.tx") == 0) {
 			object_owl(map, x, y, properties);
 		} else if (strcmp(template->string, "chest.tx") == 0) {
 			object_chest(map, x, y, properties);
+		} else if (strcmp(template->string, "bat.tx") == 0) {
+			object_enemy(map, x, y, properties, ENEMY_BAT);
 		} else {
 			LOG("Unknown template '%s'", template->string);
 		}

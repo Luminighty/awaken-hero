@@ -11,6 +11,7 @@ typedef struct {
 	Texture2D sword;
 	Texture2D hero_palettes[HERO_PALETTE_SIZE];
 	Texture2D tileset;
+	Texture2D enemies;
 } Textures;
 
 

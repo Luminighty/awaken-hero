@@ -62,13 +62,24 @@ static Client* find_or_insert_client(ServerState* state, Client* clients, size_t
 	message_init.tag = TAG_ASSIGN_UID;
 	message_init.data.uid = clients[free_slot].uid;
 	printf("New client joined!\n");
-	printf("Sending uid: tag: %d uid: %zu len: %lu\n", message_init.tag, message_init.data.uid, sizeof(message_init));
-	sendto(
+	printf(
+		"Setting uid: tag: %s, uid: %zu len: %lu\n", 
+		message_tag_labels[message_init.tag], 
+		message_init.data.uid, 
+		sizeof(message_init)
+	);
+	int res = sendto(
 		state->server.socketfd,
 		&message_init, sizeof(message_init),
-		MSG_CONFIRM,
-		(const struct sockaddr *)&clients[free_slot].cliaddr, sizeof(clients[free_slot].cliaddr)
+		0,
+		(const struct sockaddr *)&clients[free_slot].cliaddr,
+		sizeof(clients[free_slot].cliaddr)
 	);
+	if (res < 0) {
+		perror("sendto error on client connection");
+	} else if (res != sizeof(message_init)) {
+		fprintf(stderr, "sendto sent %d of %zu bytes", res, sizeof(message_init));
+	}
 	clients[free_slot].alive = true;
 
 	return &clients[free_slot];
@@ -110,14 +121,12 @@ int server_main() {
 
 	Client clients[MAXCLIENT] = {0};
 	size_t client_c = 0;
-	memset(&clients, 0, sizeof(clients));
 
 	Client current = {0};
 	current.alive = true;
 	socklen_t len = sizeof(current.cliaddr);
 	state.now = time(NULL);
 	while (1) {
-		//printf("Waiting for message\n");
 		fflush(stdout);
 		int n = recvfrom(
 			state.server.socketfd,
@@ -129,9 +138,6 @@ int server_main() {
 		Client* actual = find_or_insert_client(&state, clients, &client_c, &current);
 		actual->last_active = state.now;
 
-		//printf("Message received: ");
-		//message_print(&message);
-		//printf("\n");
 		fflush(stdout);
 
 		// TODO: Send out a Connection received message to clients?

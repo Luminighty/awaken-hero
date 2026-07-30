@@ -8,7 +8,6 @@
 #include <raylib.h>
 #include <raymath.h>
 #include "config.h"
-#include "message.h"
 
 #define LOG_HEADER "NETWORK_HERO"
 

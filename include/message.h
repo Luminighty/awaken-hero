@@ -6,12 +6,13 @@
 
 
 typedef enum {
-	TAG_NONE,
+	TAG__NONE = 0,
 	TAG_CONNECT,
 	TAG_DISCONNECT,
 	TAG_ASSIGN_UID,
 	TAG_SYNC_STATE,
 	TAG_ACTION,
+	TAG__SIZE,
 } MessageTag;
 
 
@@ -43,6 +44,9 @@ typedef struct {
 		MessageAction action;
 	} data;
 } Message;
+
+
+extern const char* message_tag_labels[TAG__SIZE];
 
 
 #endif // MESSAGE_H

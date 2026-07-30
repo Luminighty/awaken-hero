@@ -79,6 +79,7 @@ void map_objects_update(Map *map) {
 			ident ## _update(&map->ident ## s[i]);
 
 	update_entity(switch);
+	update_entity(enemy);
 
 	#undef update_entity
 }
@@ -103,7 +104,7 @@ Tile map_get_tile(Map* map, int x, int y) {
 	return map->rooms[room_y][room_x].tiles[room_xy_idx(tile_x, tile_y)];
 }
 
-
+// TODO: Add support for tileflags eventually
 void map_set_tile(Map* map, int x, int y, Tile tile, TileFlag tileflags) {
 	int room_x = x / ROOM_WIDTH;
 	int tile_x = x % ROOM_WIDTH;

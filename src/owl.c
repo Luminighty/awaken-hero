@@ -5,9 +5,7 @@
 #include "config.h"
 #include "entity.h"
 #include "log.h"
-#include "map.h"
 #include "textures.h"
-#include <stdio.h>
 #include <string.h>
 
 #define LOG_HEADER "OWL"
@@ -21,7 +19,9 @@ Owl owl_create(int x, int y) {
 	Owl owl = {0};
 	owl.id = entity_create_id(ENTITY_OWL);
 	Rectangle rect = { .x = x, .y = y, .width = 16, .height = 16 };
-	owl.collider = collider_create(owl.id, rect, COLLISION_LAYER_OWL);
+	Rectangle collider = rect;
+	collider.height = 14;
+	owl.collider = collider_create(owl.id, collider, COLLISION_LAYER_OWL);
 	owl.position = rect;
 	// collider_set_debug(owl.collider, true);
 	strcpy(owl.message, "It's dangerous to go alone.");

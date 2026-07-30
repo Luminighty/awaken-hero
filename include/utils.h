@@ -11,5 +11,7 @@ void draw_point(int x, int y, Color color);
 
 #define AS_VEC(vec) (Vector2){.x = (vec).x, .y = (vec).y}
 
+#define UNUSED(var) (void)var
+
 
 #endif // UTILS_H

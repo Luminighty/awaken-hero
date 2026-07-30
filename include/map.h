@@ -10,13 +10,9 @@
 #include "pot.h"
 #include "switch.h"
 #include "switch_block.h"
+#include "enemy.h"
 #include "tile.h"
 #include <raylib.h>
-
-
-#define X(_, Type, ident, amount) \
-	Type ident ## s [amount]; \
-	int ident ## _c;
 
 typedef struct {
 	Tile tiles[ROOM_SIZE];
@@ -26,9 +22,13 @@ typedef struct {
 // TODO: Consider using a sparse tilemap (size_t[y][x] -> Room)
 // NOTE: Maybe we could count the amount of ENTITY required per map, and alloc for that
 //	Although this is fine for now too.
+#define X(_, Type, ident, amount) \
+	Type ident ## s [amount]; \
+	int ident ## _c;
+
 typedef struct {
 	Room rooms[MAP_HEIGHT][MAP_WIDTH];
-	MAP_ENTITY_TYPES
+	MAP_ENTITY_TYPES;
 	int spawn_x, spawn_y;
 	bool is_switch_toggling;
 } Map;

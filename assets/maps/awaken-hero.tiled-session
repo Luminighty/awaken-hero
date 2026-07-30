@@ -3,27 +3,56 @@
     "expandedProjectPaths": [
         "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "debug.json": {
-            "scale": 2,
-            "selectedLayer": 0,
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 4,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 259.75,
-                "y": 176
+                "x": 94.875,
+                "y": 90
             }
+        },
+        "debug.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 4,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 82.375,
+                "y": 173
+            }
+        },
+        "enemies.tsx": {
+            "scaleInDock": 3
         },
         "tileset_base.tsx": {
             "scaleInDock": 2,
             "scaleInEditor": 4
         }
     },
+    "last.exportedFilePath": "/home/luminight/projects/awaken-hero/assets/maps",
+    "last.imagePath": "/home/luminight/projects/awaken-hero/assets/maps",
+    "last.objectTemplatePath": "/home/luminight/projects/awaken-hero/assets/maps",
+    "map.lastUsedExportFilter": "All Files (*)",
     "openFiles": [
         "debug.json",
-        "tileset_base.tsx"
+        "tileset_base.tsx",
+        "debug.tmx"
     ],
     "project": "awaken-hero.tiled-project",
     "recentFiles": [
+        "debug.tmx",
         "tileset_base.tsx",
         "debug.json"
-    ]
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
 }

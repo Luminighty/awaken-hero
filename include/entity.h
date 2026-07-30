@@ -14,6 +14,7 @@
 	X(ENTITY_DOOR, Door, door, 64) \
 	X(ENTITY_SWITCH, Switch, switch, 16) \
 	X(ENTITY_SWITCH_BLOCK, SwitchBlock, switch_block, 64) \
+	X(ENTITY_ENEMY, Enemy, enemy, 32) \
 
 
 #define X(type, ...) type ,

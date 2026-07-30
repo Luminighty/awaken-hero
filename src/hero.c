@@ -336,6 +336,8 @@ static inline int swing_frame(HeroHusk* hero) {
 }
 
 static void on_swing_collision(EntityId other, ColliderId other_collider, void* data) {
+	UNUSED(other_collider);
+
 	HeroHusk* hero = data;
 	void* entity = entity_lookup(other);
 	if (entity == NULL)
